@@ -1,35 +1,38 @@
-import { Bell, CalendarClock, CreditCard, FileText, LayoutDashboard, LogOut, Search, Settings, Stethoscope, Users, UserSquare2, UserRoundCog, Sparkles, ClipboardList, Package2, Menu } from 'lucide-react';
+import { Bell, CalendarClock, CreditCard, FileText, LayoutDashboard, LogOut, Search, Settings, Stethoscope, Users, UserRoundCog, Sparkles, ClipboardList, Package2, Menu } from 'lucide-react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useAppStore } from '@/store/app-store';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { canAccessModule } from '@/lib/access';
 import { cn } from '@/lib/utils';
+import type { PermissionModule } from '@/types';
 
-const navItems = [
-  { label: 'Dashboard', to: '/', icon: LayoutDashboard },
-  { label: 'Patients', to: '/patients', icon: Users },
-  { label: 'Appointments', to: '/appointments', icon: CalendarClock },
-  { label: 'Queue', to: '/queue', icon: ClipboardList },
-  { label: 'Consultation', to: '/consultation', icon: Stethoscope },
-  { label: 'Medical Records', to: '/medical-records', icon: FileText },
-  { label: 'Treatments', to: '/treatments', icon: Sparkles },
-  { label: 'Products', to: '/products', icon: Package2 },
-  { label: 'Cashier', to: '/cashier', icon: CreditCard },
-  { label: 'Invoice', to: '/invoice', icon: FileText },
-  { label: 'Reports', to: '/reports', icon: FileText },
-  { label: 'Staff', to: '/staff', icon: UserRoundCog },
-  { label: 'Settings', to: '/settings', icon: Settings },
+const navItems: { label: string; to: string; icon: typeof LayoutDashboard; module: PermissionModule }[] = [
+  { label: 'Dashboard', to: '/', icon: LayoutDashboard, module: 'dashboard' },
+  { label: 'Patients', to: '/patients', icon: Users, module: 'patients' },
+  { label: 'Appointments', to: '/appointments', icon: CalendarClock, module: 'appointments' },
+  { label: 'Queue', to: '/queue', icon: ClipboardList, module: 'queue' },
+  { label: 'Consultation', to: '/consultation', icon: Stethoscope, module: 'consultation' },
+  { label: 'Medical Records', to: '/medical-records', icon: FileText, module: 'medical-records' },
+  { label: 'Treatments', to: '/treatments', icon: Sparkles, module: 'treatments' },
+  { label: 'Products', to: '/products', icon: Package2, module: 'products' },
+  { label: 'Cashier', to: '/cashier', icon: CreditCard, module: 'cashier' },
+  { label: 'Invoice', to: '/invoice', icon: FileText, module: 'invoice' },
+  { label: 'Reports', to: '/reports', icon: FileText, module: 'reports' },
+  { label: 'Staff', to: '/staff', icon: UserRoundCog, module: 'staff' },
+  { label: 'Settings', to: '/settings', icon: Settings, module: 'settings' },
 ];
 
 export function AppLayout() {
-  const { currentUser, settings, followUps, appointments, logout } = useAppStore();
+  const { currentUser, settings, followUps, appointments, queue, reminders, logout } = useAppStore();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const allowedItems = useMemo(() => navItems.filter((item) => canAccessModule(currentUser?.role, item.module)), [currentUser?.role]);
 
   const handleLogout = () => {
     logout();
@@ -45,7 +48,7 @@ export function AppLayout() {
           <p className="mt-2 text-sm text-muted">Premium workflow from arrival to discharge.</p>
         </div>
         <nav className="space-y-2">
-          {navItems.map(({ label, to, icon: Icon }) => (
+          {allowedItems.map(({ label, to, icon: Icon }) => (
             <NavLink key={to} to={to} onClick={() => setSidebarOpen(false)} className={({ isActive }) => cn('flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition', isActive ? 'bg-secondary text-foreground shadow' : 'text-muted hover:bg-secondary/80')}>
               <Icon className="h-4 w-4" />
               <span>{label}</span>
@@ -55,11 +58,11 @@ export function AppLayout() {
         <div className="mt-8 rounded-[24px] bg-hero-gradient p-5">
           <Badge variant="gold">Patient Journey</Badge>
           <ol className="mt-4 space-y-2 text-sm text-foreground/80">
-            <li>1. Check-in & registration</li>
-            <li>2. Screening & queue call</li>
-            <li>3. Doctor consultation</li>
-            <li>4. Treatment & skincare plan</li>
-            <li>5. Billing, invoice, follow-up</li>
+            <li>1. Smart booking & waiting list</li>
+            <li>2. Check-in & live queue workflow</li>
+            <li>3. Consultation, treatment, cashier</li>
+            <li>4. Reminder, loyalty, analytics</li>
+            <li>5. Audit log & role-based access</li>
           </ol>
         </div>
       </motion.aside>
@@ -76,7 +79,7 @@ export function AppLayout() {
           <div className="flex flex-wrap items-center gap-3">
             <div className="rounded-2xl bg-secondary px-4 py-2 text-sm text-foreground">
               <p className="font-medium">{settings.systemName}</p>
-              <p className="text-xs text-muted">{settings.openingHours} • Follow-up {followUps.length}</p>
+              <p className="text-xs text-muted">{settings.openingHours} • Reminder {reminders.length}</p>
             </div>
             <Button variant="secondary" size="icon" className="relative">
               <Bell className="h-4 w-4" />
@@ -84,7 +87,7 @@ export function AppLayout() {
             </Button>
             <div className="rounded-2xl bg-secondary px-4 py-2 text-sm">
               <p className="font-medium">{appointments.filter((item) => item.status !== 'cancelled').length} active visits</p>
-              <p className="text-xs text-muted">Realtime dummy notifications enabled</p>
+              <p className="text-xs text-muted">Queue {queue.length} • Follow-up {followUps.length}</p>
             </div>
             {currentUser && (
               <DropdownMenu>
@@ -101,7 +104,7 @@ export function AppLayout() {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => navigate('/settings')}>System settings</DropdownMenuItem>
+                  {canAccessModule(currentUser.role, 'settings') && <DropdownMenuItem onClick={() => navigate('/settings')}>System settings</DropdownMenuItem>}
                   <DropdownMenuItem onClick={handleLogout}><LogOut className="mr-2 h-4 w-4" /> Logout</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
