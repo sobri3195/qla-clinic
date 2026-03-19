@@ -1,4 +1,21 @@
-import { Bell, CalendarClock, CreditCard, FileText, LayoutDashboard, LogOut, Search, Settings, Stethoscope, Users, UserRoundCog, Sparkles, ClipboardList, Package2, Menu, ShieldCheck } from 'lucide-react';
+import {
+  Bell,
+  CalendarClock,
+  CreditCard,
+  FileText,
+  LayoutDashboard,
+  LogOut,
+  Search,
+  Settings,
+  Stethoscope,
+  Users,
+  UserRoundCog,
+  Sparkles,
+  ClipboardList,
+  Package2,
+  Menu,
+  ShieldCheck,
+} from 'lucide-react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useMemo, useState } from 'react';
@@ -37,6 +54,7 @@ export function AppLayout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const allowedItems = useMemo(() => navItems.filter((item) => canAccessModule(currentUser?.role, item.module)), [currentUser?.role]);
+  const mobileNavItems = useMemo(() => allowedItems.slice(0, 4), [allowedItems]);
 
   const handleLogout = () => {
     logout();
@@ -97,7 +115,7 @@ export function AppLayout() {
         </div>
       </motion.aside>
 
-      <div className="flex-1 p-3 sm:p-4 lg:p-6">
+      <div className="flex-1 px-3 pb-24 pt-3 sm:px-4 sm:pt-4 lg:p-6 lg:pb-6">
         <header className="mb-6 space-y-4 rounded-[28px] border border-white/60 bg-white/80 p-4 shadow-soft backdrop-blur">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex items-center gap-3">
@@ -174,6 +192,36 @@ export function AppLayout() {
         </header>
         <Outlet />
       </div>
+
+      {mobileNavItems.length > 0 && (
+        <nav className="fixed inset-x-3 bottom-3 z-20 rounded-[28px] border border-white/70 bg-white/95 p-2 shadow-soft backdrop-blur lg:hidden">
+          <div className="grid grid-cols-5 gap-2">
+            {mobileNavItems.map(({ label, to, icon: Icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  cn(
+                    'flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-center text-[11px] font-medium transition',
+                    isActive ? 'bg-secondary text-foreground shadow-sm' : 'text-muted hover:bg-secondary/70'
+                  )
+                }
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="line-clamp-1 w-full">{label}</span>
+              </NavLink>
+            ))}
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              className="flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-center text-[11px] font-medium text-muted transition hover:bg-secondary/70"
+            >
+              <Menu className="h-4 w-4 shrink-0" />
+              <span className="line-clamp-1 w-full">Menu</span>
+            </button>
+          </div>
+        </nav>
+      )}
     </div>
   );
 }
