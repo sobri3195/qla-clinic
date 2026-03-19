@@ -20,6 +20,13 @@ export function PatientDetailPage() {
 
   const patientPrograms = treatmentPackages.filter((item) => item.activePatients.some((entry) => entry.patientId === patient.id));
   const patientReminders = reminders.filter((item) => item.patientId === patient.id);
+  const recommendedProducts = useMemo(
+    () => transactions
+      .filter((item) => item.patientId === patient.id)
+      .flatMap((transaction) => transaction.items.filter((entry) => entry.type === 'product').map((entry) => entry.label))
+      .slice(0, 4),
+    [patient.id, transactions]
+  );
 
   return (
     <PageShell
@@ -60,6 +67,9 @@ export function PatientDetailPage() {
                   <ul className="mt-4 space-y-3 text-sm text-muted">
                     <li>Concern utama: {patient.concern}</li>
                     <li>Kondisi kulit: {patient.skinType}</li>
+                    <li>Beauty goals: {patient.beautyGoals.join(', ')}</li>
+                    <li>Avoided ingredients: {patient.avoidedIngredients.join(', ')}</li>
+                    <li>Intensity preference: {patient.preferredTreatmentIntensity}</li>
                     <li>Catatan: {patient.notes}</li>
                     <li>Joined at: {patient.joinedAt}</li>
                   </ul>
@@ -69,6 +79,8 @@ export function PatientDetailPage() {
                   <ul className="mt-4 space-y-3 text-sm text-muted">
                     <li>Tier member: {patient.memberTier}</li>
                     <li>Poin loyalitas: {patient.loyaltyPoints}</li>
+                    <li>Routine compliance: {patient.routineCompliance}%</li>
+                    <li>Selfie reminder opt-in: {patient.selfieReminderOptIn ? 'Aktif' : 'Tidak aktif'}</li>
                     <li>Upcoming control: {followUps.find((item) => item.patientId === patient.id)?.dueDate ?? 'Belum ada'}</li>
                     <li>Reminder aktif: {patientReminders.length}</li>
                   </ul>
@@ -95,6 +107,12 @@ export function PatientDetailPage() {
             </TabsContent>
             <TabsContent value="programs">
               <div className="space-y-3">
+                <Card className="bg-secondary/70">
+                  <h3 className="font-semibold">Recommended beauty routine</h3>
+                  <p className="mt-2 text-sm text-muted">
+                    Produk yang paling relevan dari histori pembelian pasien: {recommendedProducts.length > 0 ? recommendedProducts.join(', ') : 'Belum ada produk yang dibeli.'}
+                  </p>
+                </Card>
                 {patientPrograms.map((program) => {
                   const progress = program.activePatients.find((entry) => entry.patientId === patient.id);
                   return (
@@ -144,7 +162,7 @@ export function PatientDetailPage() {
               {patient.treatmentHistory.map((item) => (
                 <div key={item} className="rounded-2xl border border-border p-4 text-sm">
                   <p className="font-medium">{item}</p>
-                  <p className="mt-1 text-muted">Progress monitored in premium aesthetic care workflow.</p>
+                  <p className="mt-1 text-muted">Progress monitored in premium aesthetic care workflow sesuai target: {patient.beautyGoals.join(', ')}.</p>
                 </div>
               ))}
             </div>

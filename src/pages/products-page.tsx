@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 
 export function ProductsPage() {
   const { products, inventoryLogs, purchaseOrders } = useAppStore();
+  const regimenSteps = Array.from(new Set(products.map((product) => product.regimenStep)));
 
   return (
     <PageShell title="Products & Skincare" description="Inventory management yang terhubung ke penjualan dan treatment: auto stock deduction, consumables, restock log, min stock alert, dan simple purchase order." actions={<Button onClick={() => toast.success('PO draft dapat diteruskan sebagai form procurement pada fase backend.') }><ShoppingBag className="h-4 w-4" /> Create PO draft</Button>}>
@@ -21,6 +22,8 @@ export function ProductsPage() {
                 <TR>
                   <TH>Product</TH>
                   <TH>Category</TH>
+                  <TH>Routine step</TH>
+                  <TH>Hero ingredient</TH>
                   <TH>Recommended for</TH>
                   <TH>Stock</TH>
                   <TH>Min stock</TH>
@@ -33,6 +36,8 @@ export function ProductsPage() {
                   <TR key={product.id}>
                     <TD className="font-medium">{product.name}<p className="mt-1 text-xs text-muted">Supplier: {product.supplier}</p></TD>
                     <TD>{product.category}</TD>
+                    <TD>{product.regimenStep}</TD>
+                    <TD>{product.heroIngredient}</TD>
                     <TD>{product.recommendationFor}</TD>
                     <TD>{product.stock}</TD>
                     <TD>{product.minStock}</TD>
@@ -46,6 +51,26 @@ export function ProductsPage() {
         </Card>
 
         <div className="space-y-4">
+          <Card>
+            <h3 className="text-lg font-semibold">Beauty routine builder</h3>
+            <div className="mt-4 space-y-3">
+              {regimenSteps.map((step) => (
+                <div key={step} className="rounded-2xl border border-border p-4 text-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-medium">{step}</p>
+                    <Badge variant="pink">{products.filter((product) => product.regimenStep === step).length} SKU</Badge>
+                  </div>
+                  <p className="mt-2 text-muted">
+                    {products
+                      .filter((product) => product.regimenStep === step)
+                      .map((product) => product.name)
+                      .join(', ')}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </Card>
+
           <Card>
             <h3 className="text-lg font-semibold">Restock & usage log</h3>
             <div className="mt-4 space-y-3">
