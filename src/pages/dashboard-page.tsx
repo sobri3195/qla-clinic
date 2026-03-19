@@ -1,14 +1,15 @@
-import { Activity, CalendarDays, CreditCard, Users, Sparkles, BellRing } from 'lucide-react';
+import { Activity, CalendarDays, CreditCard, Users, Sparkles, BellRing, ShieldCheck, Smartphone } from 'lucide-react';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageShell } from '@/components/shared/page-shell';
 import { StatCard } from '@/components/shared/stat-card';
 import { Badge } from '@/components/ui/badge';
 import { RevenueChart, FunnelChartCard, StaffPerformanceChart } from '@/components/charts/revenue-chart';
+import { PatientJourney } from '@/components/shared/patient-journey';
 import { useAppStore } from '@/store/app-store';
 import { formatCurrency, calculateTransactionTotal } from '@/lib/utils';
 
 export function DashboardPage() {
-  const { patients, appointments, queue, transactions, staff, followUps, treatments, reminders, auditLogs, treatmentPackages } = useAppStore();
+  const { patients, appointments, queue, transactions, staff, followUps, treatments, reminders, auditLogs, treatmentPackages, currentUser } = useAppStore();
   const todayRevenue = transactions
     .filter((transaction) => transaction.date === new Date().toISOString().slice(0, 10))
     .reduce((sum, transaction) => {
@@ -31,12 +32,45 @@ export function DashboardPage() {
   const consentedGalleryCount = patients.flatMap((patient) => patient.beforeAfter).filter((entry) => entry.consentUsage).length;
 
   return (
-    <PageShell title="Dashboard" description="Ringkasan operasional QLA Clinic hari ini: booking cerdas, queue workflow, loyalty, reminder, inventory, analytics, dan audit trail.">
+    <PageShell title="Dashboard" description="Ringkasan operasional QLA Clinic hari ini: branding premium, patient journey yang jelas, akses per role, CRUD operasional, dan tampilan responsive.">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard title="Patients today" value={`${patients.length}`} hint="Active profiles with loyalty & referral" icon={Users} />
         <StatCard title="Appointments today" value={`${appointments.filter((item) => item.date === new Date().toISOString().slice(0, 10)).length}`} hint={`${waitlistCount} waiting list monitored`} icon={CalendarDays} />
         <StatCard title="Active queue" value={`${queue.length}`} hint="Status auto-progression enabled" icon={Activity} />
         <StatCard title="Daily revenue" value={formatCurrency(todayRevenue)} hint="Stock + loyalty synced to cashier" icon={CreditCard} />
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+        <PatientJourney />
+        <Card>
+          <CardHeader>
+            <div>
+              <CardTitle>System highlights</CardTitle>
+              <CardDescription>Transformasi utama yang sekarang langsung terlihat pada aplikasi.</CardDescription>
+            </div>
+            <Badge variant="gold">What changed</Badge>
+          </CardHeader>
+          <div className="grid gap-3">
+            {[
+              ['Logo & favicon baru', 'Brand QLA kini konsisten di halaman login, sidebar, dan browser tab.', ShieldCheck],
+              ['Multi akses level', `Role aktif sekarang bisa diuji cepat sebagai ${currentUser?.role ?? '-'}.`, Sparkles],
+              ['CRUD operasional', 'Pasien, staf, dan produk dapat ditambah, diubah, dan dihapus.', Activity],
+              ['Responsive mobile', 'Layout, kartu ringkasan, dan daftar data kini lebih nyaman di layar kecil.', Smartphone],
+            ].map(([title, text, Icon]) => (
+              <div key={title} className="rounded-[24px] border border-border p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-primary">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{title}</p>
+                    <p className="mt-1 text-sm text-muted">{text}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1.4fr_0.9fr]">

@@ -2,13 +2,21 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { initialData } from '@/data/mock-data';
 import { getLowStockStatus, getTierFromPoints } from '@/lib/utils';
-import type { Appointment, AppState, MedicalRecord, Patient, QueueItem, Transaction, UserSession } from '@/types';
+import type { Appointment, AppState, MedicalRecord, Patient, Product, QueueItem, Role, Staff, Transaction, UserSession } from '@/types';
 
 interface AppStore extends AppState {
   login: (session: UserSession) => void;
   logout: () => void;
+  switchRole: (role: Role) => void;
   addPatient: (patient: Patient) => void;
   updatePatient: (patient: Patient) => void;
+  deletePatient: (id: string) => void;
+  addStaff: (staff: Staff) => void;
+  updateStaff: (staff: Staff) => void;
+  deleteStaff: (id: string) => void;
+  addProduct: (product: Product) => void;
+  updateProduct: (product: Product) => void;
+  deleteProduct: (id: string) => void;
   addAppointment: (appointment: Appointment) => void;
   updateAppointmentStatus: (id: string, status: Appointment['status']) => void;
   checkInAppointment: (appointmentId: string, actor: string) => void;
@@ -33,26 +41,94 @@ const appointmentStatusByQueue: Record<QueueItem['status'], Appointment['status'
   done: 'completed',
 };
 
+const createAudit = (actor: string, module: AppState['auditLogs'][number]['module'], action: string, targetId: string) => ({
+  id: `audit-${crypto.randomUUID().slice(0, 8)}`,
+  actor,
+  module,
+  action,
+  targetId,
+  timestamp: new Date().toISOString(),
+});
+
 export const useAppStore = create<AppStore>()(
   persist(
     (set) => ({
       ...initialData,
       login: (session) => set({ currentUser: session }),
       logout: () => set({ currentUser: null }),
-      addPatient: (patient) => set((state) => ({ patients: [patient, ...state.patients] })),
-      updatePatient: (patient) => set((state) => ({ patients: state.patients.map((item) => (item.id === patient.id ? patient : item)) })),
+      switchRole: (role) =>
+        set((state) => ({
+          currentUser: state.currentUser ? { ...state.currentUser, role } : state.currentUser,
+        })),
+      addPatient: (patient) =>
+        set((state) => ({
+          patients: [patient, ...state.patients],
+          auditLogs: [createAudit(state.currentUser?.name ?? 'System', 'patients', 'Create patient', patient.id), ...state.auditLogs],
+        })),
+      updatePatient: (patient) =>
+        set((state) => ({
+          patients: state.patients.map((item) => (item.id === patient.id ? patient : item)),
+          auditLogs: [createAudit(state.currentUser?.name ?? 'System', 'patients', 'Update patient', patient.id), ...state.auditLogs],
+        })),
+      deletePatient: (id) =>
+        set((state) => ({
+          patients: state.patients.filter((item) => item.id !== id),
+          appointments: state.appointments.filter((item) => item.patientId !== id),
+          queue: state.queue.filter((item) => item.patientId !== id),
+          medicalRecords: state.medicalRecords.filter((item) => item.patientId !== id),
+          transactions: state.transactions.filter((item) => item.patientId !== id),
+          followUps: state.followUps.filter((item) => item.patientId !== id),
+          reminders: state.reminders.filter((item) => item.patientId !== id),
+          treatmentPackages: state.treatmentPackages.map((pkg) => ({
+            ...pkg,
+            activePatients: pkg.activePatients.filter((entry) => entry.patientId !== id),
+          })),
+          auditLogs: [createAudit(state.currentUser?.name ?? 'System', 'patients', 'Delete patient', id), ...state.auditLogs],
+        })),
+      addStaff: (staff) =>
+        set((state) => ({
+          staff: [staff, ...state.staff],
+          auditLogs: [createAudit(state.currentUser?.name ?? 'System', 'staff', 'Create staff', staff.id), ...state.auditLogs],
+        })),
+      updateStaff: (staff) =>
+        set((state) => ({
+          staff: state.staff.map((item) => (item.id === staff.id ? staff : item)),
+          auditLogs: [createAudit(state.currentUser?.name ?? 'System', 'staff', 'Update staff', staff.id), ...state.auditLogs],
+        })),
+      deleteStaff: (id) =>
+        set((state) => ({
+          staff: state.staff.filter((item) => item.id !== id),
+          auditLogs: [createAudit(state.currentUser?.name ?? 'System', 'staff', 'Delete staff', id), ...state.auditLogs],
+        })),
+      addProduct: (product) =>
+        set((state) => ({
+          products: [product, ...state.products],
+          auditLogs: [createAudit(state.currentUser?.name ?? 'System', 'products', 'Create product', product.id), ...state.auditLogs],
+        })),
+      updateProduct: (product) =>
+        set((state) => ({
+          products: state.products.map((item) => (item.id === product.id ? { ...product, status: getLowStockStatus(product.stock, product.minStock) } : item)),
+          auditLogs: [createAudit(state.currentUser?.name ?? 'System', 'products', 'Update product', product.id), ...state.auditLogs],
+        })),
+      deleteProduct: (id) =>
+        set((state) => ({
+          products: state.products.filter((item) => item.id !== id),
+          inventoryLogs: state.inventoryLogs.filter((item) => item.productId !== id),
+          purchaseOrders: state.purchaseOrders.map((order) => ({
+            ...order,
+            items: order.items.filter((item) => item.productId !== id),
+          })),
+          treatments: state.treatments.map((treatment) => ({
+            ...treatment,
+            consumables: treatment.consumables.filter((entry) => entry.productId !== id),
+          })),
+          auditLogs: [createAudit(state.currentUser?.name ?? 'System', 'products', 'Delete product', id), ...state.auditLogs],
+        })),
       addAppointment: (appointment) =>
         set((state) => ({
           appointments: [appointment, ...state.appointments],
           auditLogs: [
-            {
-              id: `audit-${crypto.randomUUID().slice(0, 8)}`,
-              actor: state.currentUser?.name ?? 'System',
-              module: 'appointments',
-              action: appointment.waitingList ? 'Create waiting list booking' : 'Create booking',
-              targetId: appointment.id,
-              timestamp: new Date().toISOString(),
-            },
+            createAudit(state.currentUser?.name ?? 'System', 'appointments', appointment.waitingList ? 'Create waiting list booking' : 'Create booking', appointment.id),
             ...state.auditLogs,
           ],
         })),
@@ -78,10 +154,7 @@ export const useAppStore = create<AppStore>()(
               },
               ...state.queue,
             ],
-            auditLogs: [
-              { id: `audit-${crypto.randomUUID().slice(0, 8)}`, actor, module: 'queue', action: 'Check-in from appointment', targetId: appointmentId, timestamp: new Date().toISOString() },
-              ...state.auditLogs,
-            ],
+            auditLogs: [createAudit(actor, 'queue', 'Check-in from appointment', appointmentId), ...state.auditLogs],
           };
         }),
       advanceQueueStatus: (id, actor) =>
@@ -104,10 +177,7 @@ export const useAppStore = create<AppStore>()(
             appointments: state.appointments.map((appointment) =>
               appointment.id === queueItem.appointmentId ? { ...appointment, status: appointmentStatusByQueue[nextStatus] } : appointment
             ),
-            auditLogs: [
-              { id: `audit-${crypto.randomUUID().slice(0, 8)}`, actor, module: 'queue', action: `Move queue to ${nextStatus}`, targetId: id, timestamp: new Date().toISOString() },
-              ...state.auditLogs,
-            ],
+            auditLogs: [createAudit(actor, 'queue', `Move queue to ${nextStatus}`, id), ...state.auditLogs],
           };
         }),
       saveMedicalRecord: (record, actor) =>
@@ -115,10 +185,7 @@ export const useAppStore = create<AppStore>()(
           const exists = state.medicalRecords.some((item) => item.id === record.id);
           return {
             medicalRecords: exists ? state.medicalRecords.map((item) => (item.id === record.id ? record : item)) : [record, ...state.medicalRecords],
-            auditLogs: [
-              { id: `audit-${crypto.randomUUID().slice(0, 8)}`, actor, module: 'consultation', action: exists ? 'Update medical record' : 'Create medical record', targetId: record.id, timestamp: new Date().toISOString() },
-              ...state.auditLogs,
-            ],
+            auditLogs: [createAudit(actor, 'consultation', exists ? 'Update medical record' : 'Create medical record', record.id), ...state.auditLogs],
           };
         }),
       addTransaction: (transaction, actor) =>
@@ -135,10 +202,7 @@ export const useAppStore = create<AppStore>()(
                     ...item,
                     loyaltyPoints: nextPoints,
                     memberTier: getTierFromPoints(nextPoints),
-                    purchaseHistory: [
-                      ...transaction.items.filter((entry) => entry.type === 'product').map((entry) => entry.label),
-                      ...item.purchaseHistory,
-                    ].slice(0, 8),
+                    purchaseHistory: [...transaction.items.filter((entry) => entry.type === 'product').map((entry) => entry.label), ...item.purchaseHistory].slice(0, 8),
                   }
                 : item
             ),
@@ -177,10 +241,7 @@ export const useAppStore = create<AppStore>()(
               }),
               ...state.inventoryLogs,
             ],
-            auditLogs: [
-              { id: `audit-${crypto.randomUUID().slice(0, 8)}`, actor, module: 'cashier', action: 'Checkout transaction', targetId: transaction.id, timestamp: new Date().toISOString() },
-              ...state.auditLogs,
-            ],
+            auditLogs: [createAudit(actor, 'cashier', 'Checkout transaction', transaction.id), ...state.auditLogs],
           };
         }),
     }),
