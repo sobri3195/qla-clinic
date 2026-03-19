@@ -8,7 +8,7 @@ import { useAppStore } from '@/store/app-store';
 import { formatCurrency, calculateTransactionTotal } from '@/lib/utils';
 
 export function DashboardPage() {
-  const { patients, appointments, queue, transactions, staff, followUps, treatments } = useAppStore();
+  const { patients, appointments, queue, transactions, staff, followUps, treatments, reminders, auditLogs, treatmentPackages } = useAppStore();
   const todayRevenue = transactions
     .filter((transaction) => transaction.date === new Date().toISOString().slice(0, 10))
     .reduce((sum, transaction) => {
@@ -17,14 +17,15 @@ export function DashboardPage() {
     }, 0);
 
   const topTreatment = [...treatments].sort((a, b) => b.popularity - a.popularity)[0];
+  const waitlistCount = appointments.filter((item) => item.waitingList).length;
 
   return (
-    <PageShell title="Dashboard" description="Ringkasan operasional QLA Clinic hari ini, lengkap dengan metrik pasien, appointment, queue, dan pendapatan.">
+    <PageShell title="Dashboard" description="Ringkasan operasional QLA Clinic hari ini: booking cerdas, queue workflow, loyalty, reminder, inventory, analytics, dan audit trail.">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="Patients today" value={`${patients.length}`} hint="+12% dibanding kemarin" icon={Users} />
-        <StatCard title="Appointments today" value={`${appointments.filter((item) => item.date === new Date().toISOString().slice(0, 10)).length}`} hint="7 confirmed, 1 arrived" icon={CalendarDays} />
-        <StatCard title="Active queue" value={`${queue.length}`} hint="2 pasien menunggu screening" icon={Activity} />
-        <StatCard title="Daily revenue" value={formatCurrency(todayRevenue)} hint="Payment mix: transfer & debit" icon={CreditCard} />
+        <StatCard title="Patients today" value={`${patients.length}`} hint="Active profiles with loyalty & referral" icon={Users} />
+        <StatCard title="Appointments today" value={`${appointments.filter((item) => item.date === new Date().toISOString().slice(0, 10)).length}`} hint={`${waitlistCount} waiting list monitored`} icon={CalendarDays} />
+        <StatCard title="Active queue" value={`${queue.length}`} hint="Status auto-progression enabled" icon={Activity} />
+        <StatCard title="Daily revenue" value={formatCurrency(todayRevenue)} hint="Stock + loyalty synced to cashier" icon={CreditCard} />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1.4fr_0.9fr]">
@@ -53,8 +54,8 @@ export function DashboardPage() {
         <Card>
           <CardHeader>
             <div>
-              <CardTitle>Top treatment</CardTitle>
-              <CardDescription>Treatment terlaris dan performa staf yang bertugas.</CardDescription>
+              <CardTitle>Top treatment & package</CardTitle>
+              <CardDescription>Treatment terlaris, bundle program, dan performa staf yang bertugas.</CardDescription>
             </div>
           </CardHeader>
           <div className="space-y-4">
@@ -62,6 +63,7 @@ export function DashboardPage() {
               <p className="text-sm text-muted">Most booked</p>
               <h3 className="mt-2 text-2xl font-semibold">{topTreatment.name}</h3>
               <p className="mt-2 text-sm text-muted">{topTreatment.category} • {formatCurrency(topTreatment.price)} • popularity {topTreatment.popularity}%</p>
+              <p className="mt-2 text-sm text-muted">Package highlight: {treatmentPackages[0]?.name}</p>
             </div>
             <div className="space-y-3">
               {staff.slice(0, 4).map((member) => (
@@ -88,19 +90,25 @@ export function DashboardPage() {
         <Card>
           <CardHeader>
             <div>
-              <CardTitle>Notifications</CardTitle>
-              <CardDescription>Appointment hari ini dan reminder follow-up.</CardDescription>
+              <CardTitle>Notifications & audit</CardTitle>
+              <CardDescription>Reminder omnichannel dan jejak perubahan data.</CardDescription>
             </div>
             <BellRing className="h-5 w-5 text-primary" />
           </CardHeader>
           <div className="space-y-4">
-            {appointments.map((appointment) => (
-              <div key={appointment.id} className="rounded-2xl bg-secondary p-4">
+            {reminders.slice(0, 2).map((item) => (
+              <div key={item.id} className="rounded-2xl bg-secondary p-4">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="font-medium">Booking {appointment.time}</p>
-                  <Badge variant={appointment.status === 'completed' ? 'green' : 'pink'}>{appointment.status}</Badge>
+                  <p className="font-medium">{item.type}</p>
+                  <Badge variant={item.status === 'Sent' ? 'green' : 'pink'}>{item.status}</Badge>
                 </div>
-                <p className="mt-2 text-sm text-muted">{appointment.notes}</p>
+                <p className="mt-2 text-sm text-muted">{item.channel} • {item.scheduledFor}</p>
+              </div>
+            ))}
+            {auditLogs.slice(0, 3).map((item) => (
+              <div key={item.id} className="rounded-2xl border border-border p-4">
+                <p className="font-medium">{item.action}</p>
+                <p className="mt-2 text-sm text-muted">{item.actor} • {item.module}</p>
               </div>
             ))}
             {followUps.map((item) => (

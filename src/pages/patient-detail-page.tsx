@@ -11,12 +11,15 @@ import { useAppStore } from '@/store/app-store';
 export function PatientDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { patients, appointments, medicalRecords, transactions, followUps } = useAppStore();
+  const { patients, appointments, medicalRecords, transactions, followUps, treatmentPackages, reminders } = useAppStore();
   const patient = useMemo(() => patients.find((item) => item.id === id), [patients, id]);
 
   if (!patient) {
     return <PageShell title="Patient not found"><Card>Data pasien tidak ditemukan.</Card></PageShell>;
   }
+
+  const patientPrograms = treatmentPackages.filter((item) => item.activePatients.some((entry) => entry.patientId === patient.id));
+  const patientReminders = reminders.filter((item) => item.patientId === patient.id);
 
   return (
     <PageShell
@@ -33,7 +36,7 @@ export function PatientDetailPage() {
                 <Badge variant={patient.status === 'VIP' ? 'gold' : 'green'}>{patient.status}</Badge>
               </div>
               <h2 className="mt-4 text-3xl font-semibold">{patient.concern}</h2>
-              <p className="mt-2 max-w-2xl text-sm text-muted">Skin type {patient.skinType}. Alergi: {patient.allergies.join(', ')}. Loyalty points {patient.loyaltyPoints}.</p>
+              <p className="mt-2 max-w-2xl text-sm text-muted">Skin type {patient.skinType}. Alergi: {patient.allergies.join(', ')}. Loyalty points {patient.loyaltyPoints}. Referral code {patient.referralCode}.</p>
             </div>
             <div className="rounded-[24px] bg-secondary p-4 text-sm">
               <p className="font-medium">Last visit</p>
@@ -47,7 +50,7 @@ export function PatientDetailPage() {
             <TabsList className="mt-6">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="visits">Visits</TabsTrigger>
-              <TabsTrigger value="products">Products</TabsTrigger>
+              <TabsTrigger value="programs">Programs</TabsTrigger>
               <TabsTrigger value="photos">Before-After</TabsTrigger>
             </TabsList>
             <TabsContent value="overview">
@@ -62,11 +65,12 @@ export function PatientDetailPage() {
                   </ul>
                 </Card>
                 <Card className="bg-secondary/70">
-                  <h3 className="font-semibold">Follow-up & membership</h3>
+                  <h3 className="font-semibold">Follow-up, reminders & loyalty</h3>
                   <ul className="mt-4 space-y-3 text-sm text-muted">
                     <li>Tier member: {patient.memberTier}</li>
                     <li>Poin loyalitas: {patient.loyaltyPoints}</li>
                     <li>Upcoming control: {followUps.find((item) => item.patientId === patient.id)?.dueDate ?? 'Belum ada'}</li>
+                    <li>Reminder aktif: {patientReminders.length}</li>
                   </ul>
                 </Card>
               </div>
@@ -75,9 +79,10 @@ export function PatientDetailPage() {
               <div className="space-y-3">
                 {medicalRecords.filter((item) => item.patientId === patient.id).map((record) => (
                   <Card key={record.id} className="bg-secondary/70">
-                    <p className="text-sm text-muted">{record.visitDate}</p>
+                    <p className="text-sm text-muted">{record.visitDate} • {record.concernTemplate}</p>
                     <h3 className="mt-2 font-semibold">{record.diagnosis}</h3>
                     <p className="mt-2 text-sm text-muted">SOAP plan: {record.soap.plan}</p>
+                    <p className="mt-2 text-sm text-muted">Consent checklist: {record.consentChecklist.join(', ')}</p>
                   </Card>
                 ))}
                 {appointments.filter((item) => item.patientId === patient.id).map((appointment) => (
@@ -88,25 +93,42 @@ export function PatientDetailPage() {
                 ))}
               </div>
             </TabsContent>
-            <TabsContent value="products">
+            <TabsContent value="programs">
               <div className="space-y-3">
-                {transactions.filter((item) => item.patientId === patient.id).map((transaction) => (
-                  <Card key={transaction.id} className="bg-secondary/70">
-                    <p className="font-medium">Transaction {transaction.id}</p>
-                    <ul className="mt-3 space-y-2 text-sm text-muted">
-                      {transaction.items.map((item) => <li key={item.id}>{item.label} • qty {item.qty}</li>)}
-                    </ul>
-                  </Card>
-                ))}
+                {patientPrograms.map((program) => {
+                  const progress = program.activePatients.find((entry) => entry.patientId === patient.id);
+                  return (
+                    <Card key={program.id} className="bg-secondary/70">
+                      <p className="font-medium">{program.name}</p>
+                      <p className="mt-2 text-sm text-muted">{progress?.sessionsUsed}/{progress?.totalSessions} sesi • Expiry {progress?.expiresAt}</p>
+                      <p className="mt-2 text-sm text-muted">Bundling homecare & treatment untuk concern {program.targetConcern}.</p>
+                    </Card>
+                  );
+                })}
               </div>
             </TabsContent>
             <TabsContent value="photos">
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-4">
                 {patient.beforeAfter.map((image, index) => (
                   <Card key={index} className="overflow-hidden p-0">
+                    <div className="border-b border-border px-6 py-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="font-medium">{image.sessionLabel}</p>
+                          <p className="text-sm text-muted">{image.visitDate} • Area {image.area}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge variant="pink">Compare</Badge>
+                          <Badge variant={image.consentUsage ? 'green' : 'gold'}>{image.consentUsage ? 'Consent signed' : 'Internal only'}</Badge>
+                        </div>
+                      </div>
+                    </div>
                     <div className="grid grid-cols-2 gap-0">
                       <img src={image.before} alt="Before" className="h-56 w-full object-cover" />
                       <img src={image.after} alt="After" className="h-56 w-full object-cover" />
+                    </div>
+                    <div className="px-6 py-4 text-sm text-muted">
+                      <p>Outcome summary: {image.progressNotes}</p>
                     </div>
                   </Card>
                 ))}
@@ -115,26 +137,44 @@ export function PatientDetailPage() {
           </Tabs>
         </Card>
 
-        <Card>
-          <h3 className="text-lg font-semibold">Treatment history</h3>
-          <div className="mt-4 space-y-3">
-            {patient.treatmentHistory.map((item) => (
-              <div key={item} className="rounded-2xl border border-border p-4 text-sm">
-                <p className="font-medium">{item}</p>
-                <p className="mt-1 text-muted">Progress monitored in premium aesthetic care workflow.</p>
-              </div>
-            ))}
-          </div>
-          <h3 className="mt-6 text-lg font-semibold">Purchase history</h3>
-          <div className="mt-4 space-y-3">
-            {patient.purchaseHistory.map((item) => (
-              <div key={item} className="rounded-2xl border border-border p-4 text-sm">
-                <p className="font-medium">{item}</p>
-                <p className="mt-1 text-muted">Recommended as part of homecare routine.</p>
-              </div>
-            ))}
-          </div>
-        </Card>
+        <div className="space-y-4">
+          <Card>
+            <h3 className="text-lg font-semibold">Treatment history</h3>
+            <div className="mt-4 space-y-3">
+              {patient.treatmentHistory.map((item) => (
+                <div key={item} className="rounded-2xl border border-border p-4 text-sm">
+                  <p className="font-medium">{item}</p>
+                  <p className="mt-1 text-muted">Progress monitored in premium aesthetic care workflow.</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <Card>
+            <h3 className="text-lg font-semibold">Purchase history</h3>
+            <div className="mt-4 space-y-3">
+              {transactions.filter((item) => item.patientId === patient.id).map((transaction) => (
+                <div key={transaction.id} className="rounded-2xl border border-border p-4 text-sm">
+                  <p className="font-medium">{transaction.id}</p>
+                  <p className="mt-1 text-muted">{transaction.items.map((item) => item.label).join(', ')}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <Card>
+            <h3 className="text-lg font-semibold">Reminder timeline</h3>
+            <div className="mt-4 space-y-3">
+              {patientReminders.map((item) => (
+                <div key={item.id} className="rounded-2xl border border-border p-4 text-sm">
+                  <p className="font-medium">{item.type}</p>
+                  <p className="mt-1 text-muted">{item.channel} • {item.scheduledFor}</p>
+                  <p className="mt-1 text-muted">{item.notes}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
       </div>
     </PageShell>
   );

@@ -1,13 +1,24 @@
 export type Role = 'Admin / Front Office' | 'Dokter / Aesthetic Doctor' | 'Beautician / Therapist' | 'Kasir' | 'Manager / Owner';
 
-export type AppointmentStatus = 'booked' | 'confirmed' | 'arrived' | 'in-treatment' | 'completed' | 'cancelled';
-export type QueueStatus = 'waiting' | 'screening' | 'consultation' | 'treatment' | 'billing' | 'done';
+export type AppointmentStatus = 'booked' | 'confirmed' | 'arrived' | 'in-treatment' | 'completed' | 'cancelled' | 'waiting-list';
+export type QueueStatus = 'waiting' | 'consultation' | 'treatment' | 'billing' | 'done';
 export type PaymentStatus = 'unpaid' | 'partial' | 'paid';
+export type PermissionModule = 'dashboard' | 'patients' | 'appointments' | 'queue' | 'consultation' | 'medical-records' | 'treatments' | 'products' | 'cashier' | 'invoice' | 'reports' | 'staff' | 'settings';
 
 export interface UserSession {
   name: string;
   role: Role;
   avatar: string;
+}
+
+export interface BeforeAfterEntry {
+  visitDate: string;
+  sessionLabel: string;
+  area: string;
+  before: string;
+  after: string;
+  progressNotes: string;
+  consentUsage: boolean;
 }
 
 export interface Patient {
@@ -23,11 +34,13 @@ export interface Patient {
   allergies: string[];
   memberTier: 'Non Member' | 'Silver' | 'Gold' | 'Platinum';
   loyaltyPoints: number;
+  referralCode: string;
+  referredBy?: string;
   status: 'Active' | 'Follow Up' | 'VIP';
   joinedAt: string;
   lastVisit: string;
   notes: string;
-  beforeAfter: { before: string; after: string }[];
+  beforeAfter: BeforeAfterEntry[];
   treatmentHistory: string[];
   purchaseHistory: string[];
 }
@@ -43,6 +56,11 @@ export interface Staff {
   avatar: string;
 }
 
+export interface TreatmentConsumable {
+  productId: string;
+  qty: number;
+}
+
 export interface TreatmentCatalog {
   id: string;
   name: string;
@@ -51,6 +69,7 @@ export interface TreatmentCatalog {
   duration: number;
   type: 'Doctor' | 'Therapist' | 'Hybrid';
   popularity: number;
+  consumables: TreatmentConsumable[];
 }
 
 export interface Product {
@@ -59,6 +78,8 @@ export interface Product {
   category: string;
   price: number;
   stock: number;
+  minStock: number;
+  supplier: string;
   recommendationFor: string;
   status: 'Ready' | 'Low Stock';
 }
@@ -71,7 +92,12 @@ export interface Appointment {
   treatmentId: string;
   date: string;
   time: string;
+  duration: number;
+  roomId: string;
+  servicePoint: string;
   status: AppointmentStatus;
+  overbookingRisk: 'safe' | 'warning' | 'overbooked';
+  waitingList: boolean;
   notes: string;
 }
 
@@ -83,6 +109,8 @@ export interface QueueItem {
   servicePoint: string;
   status: QueueStatus;
   etaMinutes: number;
+  updatedBy: string;
+  updatedAt: string;
 }
 
 export interface MedicalRecord {
@@ -96,6 +124,7 @@ export interface MedicalRecord {
   allergies: string;
   previousTreatment: string;
   diagnosis: string;
+  concernTemplate: string;
   soap: {
     subjective: string;
     objective: string;
@@ -103,7 +132,9 @@ export interface MedicalRecord {
     plan: string;
   };
   consent: boolean;
+  consentChecklist: string[];
   recommendations: string[];
+  homecarePlan: string[];
   photos: string[];
 }
 
@@ -123,6 +154,7 @@ export interface Transaction {
   items: TransactionItem[];
   discount: number;
   tax: number;
+  pointsRedeemed: number;
   paymentMethod: 'tunai' | 'debit' | 'transfer' | 'e-wallet';
   paymentStatus: PaymentStatus;
   memberPricing: boolean;
@@ -137,6 +169,71 @@ export interface FollowUp {
   satisfaction: number;
 }
 
+export interface TreatmentPackage {
+  id: string;
+  name: string;
+  targetConcern: string;
+  bundledTreatmentIds: string[];
+  bundledProductIds: string[];
+  sessionsIncluded: number;
+  expiryDays: number;
+  price: number;
+  activePatients: {
+    patientId: string;
+    sessionsUsed: number;
+    totalSessions: number;
+    expiresAt: string;
+    nextSessionDate: string;
+  }[];
+}
+
+export interface InventoryLog {
+  id: string;
+  productId: string;
+  type: 'sale' | 'consumable' | 'restock' | 'purchase-order';
+  qty: number;
+  date: string;
+  notes: string;
+  reference: string;
+}
+
+export interface PurchaseOrder {
+  id: string;
+  supplier: string;
+  expectedDate: string;
+  status: 'Draft' | 'Ordered' | 'Received';
+  items: {
+    productId: string;
+    qty: number;
+    cost: number;
+  }[];
+}
+
+export interface ReminderLog {
+  id: string;
+  patientId: string;
+  type: 'appointment-h-1' | 'follow-up-h+3' | 'follow-up-h+7' | 'no-show-recovery' | 'review-request' | 'birthday';
+  channel: 'WhatsApp' | 'Email' | 'SMS';
+  scheduledFor: string;
+  status: 'Scheduled' | 'Sent' | 'Delivered';
+  template: string;
+  notes: string;
+}
+
+export interface AuditLog {
+  id: string;
+  actor: string;
+  module: PermissionModule;
+  action: string;
+  targetId: string;
+  timestamp: string;
+}
+
+export interface PermissionMatrixEntry {
+  role: Role;
+  modules: PermissionModule[];
+}
+
 export interface ClinicSettings {
   clinicName: string;
   systemName: string;
@@ -145,18 +242,29 @@ export interface ClinicSettings {
   paymentMethods: string[];
   theme: string;
   notifications: boolean;
+  servicePoints: {
+    id: string;
+    name: string;
+    capacity: number;
+  }[];
 }
 
 export interface AppState {
   patients: Patient[];
   staff: Staff[];
   treatments: TreatmentCatalog[];
+  treatmentPackages: TreatmentPackage[];
   products: Product[];
   appointments: Appointment[];
   queue: QueueItem[];
   medicalRecords: MedicalRecord[];
   transactions: Transaction[];
   followUps: FollowUp[];
+  inventoryLogs: InventoryLog[];
+  purchaseOrders: PurchaseOrder[];
+  reminders: ReminderLog[];
+  auditLogs: AuditLog[];
+  permissions: PermissionMatrixEntry[];
   settings: ClinicSettings;
   currentUser: UserSession | null;
 }
