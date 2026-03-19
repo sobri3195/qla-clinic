@@ -18,6 +18,17 @@ export function DashboardPage() {
 
   const topTreatment = [...treatments].sort((a, b) => b.popularity - a.popularity)[0];
   const waitlistCount = appointments.filter((item) => item.waitingList).length;
+  const averageRoutineCompliance = Math.round(patients.reduce((sum, patient) => sum + patient.routineCompliance, 0) / Math.max(patients.length, 1));
+  const concernDistribution = patients.reduce<Record<string, number>>((acc, patient) => {
+    patient.beautyGoals.forEach((goal) => {
+      acc[goal] = (acc[goal] ?? 0) + 1;
+    });
+    return acc;
+  }, {});
+  const topBeautyGoals = Object.entries(concernDistribution)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 3);
+  const consentedGalleryCount = patients.flatMap((patient) => patient.beforeAfter).filter((entry) => entry.consentUsage).length;
 
   return (
     <PageShell title="Dashboard" description="Ringkasan operasional QLA Clinic hari ini: booking cerdas, queue workflow, loyalty, reminder, inventory, analytics, dan audit trail.">
@@ -47,6 +58,48 @@ export function DashboardPage() {
             </div>
           </CardHeader>
           <FunnelChartCard />
+        </Card>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+        <Card>
+          <CardHeader>
+            <div>
+              <CardTitle>Beauty goals tracker</CardTitle>
+              <CardDescription>Snapshot target kecantikan pasien yang paling sering diminta untuk membantu campaign dan bundling treatment.</CardDescription>
+            </div>
+            <Sparkles className="h-5 w-5 text-primary" />
+          </CardHeader>
+          <div className="grid gap-4 md:grid-cols-3">
+            {topBeautyGoals.map(([goal, count]) => (
+              <div key={goal} className="rounded-[24px] border border-border p-5">
+                <p className="text-sm text-muted">Beauty goal</p>
+                <h3 className="mt-2 text-lg font-semibold">{goal}</h3>
+                <p className="mt-2 text-sm text-muted">{count} pasien aktif menargetkan outcome ini.</p>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <div>
+              <CardTitle>Beauty care adherence</CardTitle>
+              <CardDescription>Kedisiplinan homecare dan aset konten before-after yang siap dipakai untuk follow-up premium.</CardDescription>
+            </div>
+          </CardHeader>
+          <div className="space-y-4">
+            <div className="rounded-[24px] bg-secondary p-5">
+              <p className="text-sm text-muted">Average routine compliance</p>
+              <h3 className="mt-2 text-3xl font-semibold">{averageRoutineCompliance}%</h3>
+              <p className="mt-2 text-sm text-muted">Digabung dari kepatuhan homecare seluruh pasien aktif.</p>
+            </div>
+            <div className="rounded-[24px] border border-border p-5">
+              <p className="text-sm text-muted">Consented before-after gallery</p>
+              <h3 className="mt-2 text-3xl font-semibold">{consentedGalleryCount} assets</h3>
+              <p className="mt-2 text-sm text-muted">Bisa dipakai untuk edukasi treatment dan social proof internal klinik.</p>
+            </div>
+          </div>
         </Card>
       </div>
 

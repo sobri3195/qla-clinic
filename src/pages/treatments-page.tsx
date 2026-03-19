@@ -10,6 +10,16 @@ import { toast } from 'sonner';
 
 export function TreatmentsPage() {
   const { treatments, treatmentPackages, patients, products } = useAppStore();
+  const trendingConcerns = Object.entries(
+    treatments.reduce<Record<string, number>>((acc, treatment) => {
+      treatment.concernTags.forEach((tag) => {
+        acc[tag] = (acc[tag] ?? 0) + 1;
+      });
+      return acc;
+    }, {})
+  )
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5);
 
   return (
     <PageShell title="Treatment Management" description="Master treatment, package/program builder multi-session, bundling treatment + produk, expiry, dan progress program pasien." actions={<Button onClick={() => toast.success('Prototype package builder siap dilanjutkan ke backend / form dinamis.') }><PlusCircle className="h-4 w-4" /> New package</Button>}>
@@ -22,7 +32,10 @@ export function TreatmentsPage() {
                 <TR>
                   <TH>Treatment</TH>
                   <TH>Category</TH>
+                  <TH>Beauty concerns</TH>
                   <TH>Duration</TH>
+                  <TH>Downtime</TH>
+                  <TH>Result window</TH>
                   <TH>Price</TH>
                   <TH>Handled by</TH>
                   <TH>Consumables</TH>
@@ -33,7 +46,10 @@ export function TreatmentsPage() {
                   <TR key={treatment.id}>
                     <TD><p className="font-medium">{treatment.name}</p></TD>
                     <TD>{treatment.category}</TD>
+                    <TD>{treatment.concernTags.join(', ')}</TD>
                     <TD>{treatment.duration} mins</TD>
+                    <TD>{treatment.downtimeDays === 0 ? 'No downtime' : `${treatment.downtimeDays} hari`}</TD>
+                    <TD>{treatment.resultWindow}</TD>
                     <TD>{formatCurrency(treatment.price)}</TD>
                     <TD><Badge variant={treatment.type === 'Doctor' ? 'gold' : treatment.type === 'Hybrid' ? 'pink' : 'green'}>{treatment.type}</Badge></TD>
                     <TD>{treatment.consumables.map((consumable) => `${products.find((item) => item.id === consumable.productId)?.name} x${consumable.qty}`).join(', ')}</TD>
@@ -45,6 +61,21 @@ export function TreatmentsPage() {
         </Card>
 
         <div className="space-y-4">
+          <Card>
+            <h3 className="text-lg font-semibold">Beauty concern map</h3>
+            <div className="mt-4 space-y-3">
+              {trendingConcerns.map(([tag, count]) => (
+                <div key={tag} className="rounded-2xl border border-border p-4 text-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-medium">{tag}</p>
+                    <Badge variant="pink">{count} treatment</Badge>
+                  </div>
+                  <p className="mt-2 text-muted">Concern ini sering muncul di katalog beauty treatment untuk bundling program.</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+
           {treatmentPackages.map((item) => (
             <Card key={item.id}>
               <div className="flex items-start justify-between gap-3">
@@ -58,6 +89,7 @@ export function TreatmentsPage() {
                 <p>Bundled treatment: {item.bundledTreatmentIds.map((id) => treatments.find((entry) => entry.id === id)?.name).join(', ')}</p>
                 <p className="mt-2">Bundled produk: {item.bundledProductIds.map((id) => products.find((entry) => entry.id === id)?.name).join(', ')}</p>
                 <p className="mt-2">Expiry paket: {item.expiryDays} hari • Harga {formatCurrency(item.price)}</p>
+                <p className="mt-2">Beauty target: {item.targetConcern}</p>
               </div>
               <div className="mt-4 space-y-3">
                 {item.activePatients.map((program) => {

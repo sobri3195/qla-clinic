@@ -40,6 +40,11 @@ export interface Patient {
   joinedAt: string;
   lastVisit: string;
   notes: string;
+  beautyGoals: string[];
+  avoidedIngredients: string[];
+  preferredTreatmentIntensity: 'Gentle' | 'Moderate' | 'Intensive';
+  routineCompliance: number;
+  selfieReminderOptIn: boolean;
   beforeAfter: BeforeAfterEntry[];
   treatmentHistory: string[];
   purchaseHistory: string[];
@@ -69,6 +74,9 @@ export interface TreatmentCatalog {
   duration: number;
   type: 'Doctor' | 'Therapist' | 'Hybrid';
   popularity: number;
+  concernTags: string[];
+  downtimeDays: number;
+  resultWindow: string;
   consumables: TreatmentConsumable[];
 }
 
@@ -76,6 +84,8 @@ export interface Product {
   id: string;
   name: string;
   category: string;
+  regimenStep: string;
+  heroIngredient: string;
   price: number;
   stock: number;
   minStock: number;
