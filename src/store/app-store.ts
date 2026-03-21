@@ -50,6 +50,61 @@ const createAudit = (actor: string, module: AppState['auditLogs'][number]['modul
   timestamp: new Date().toISOString(),
 });
 
+const mergeArrayField = <T>(persistedValue: unknown, fallback: T[]) => (Array.isArray(persistedValue) ? persistedValue : fallback);
+
+const normalizePersistedState = (persistedState: Partial<AppState> | undefined): Partial<AppState> | undefined => {
+  if (!persistedState) return persistedState;
+
+  return {
+    ...persistedState,
+    patients: Array.isArray(persistedState.patients)
+      ? persistedState.patients.map((patient) => ({
+          ...patient,
+          allergies: mergeArrayField(patient?.allergies, []),
+          beautyGoals: mergeArrayField(patient?.beautyGoals, []),
+          avoidedIngredients: mergeArrayField(patient?.avoidedIngredients, []),
+          beforeAfter: mergeArrayField(patient?.beforeAfter, []),
+          treatmentHistory: mergeArrayField(patient?.treatmentHistory, []),
+          purchaseHistory: mergeArrayField(patient?.purchaseHistory, []),
+        }))
+      : persistedState.patients,
+    treatments: Array.isArray(persistedState.treatments)
+      ? persistedState.treatments.map((treatment) => ({
+          ...treatment,
+          concernTags: mergeArrayField(treatment?.concernTags, []),
+          consumables: mergeArrayField(treatment?.consumables, []),
+        }))
+      : persistedState.treatments,
+    treatmentPackages: Array.isArray(persistedState.treatmentPackages)
+      ? persistedState.treatmentPackages.map((pkg) => ({
+          ...pkg,
+          bundledTreatmentIds: mergeArrayField(pkg?.bundledTreatmentIds, []),
+          bundledProductIds: mergeArrayField(pkg?.bundledProductIds, []),
+          activePatients: mergeArrayField(pkg?.activePatients, []),
+        }))
+      : persistedState.treatmentPackages,
+    transactions: Array.isArray(persistedState.transactions)
+      ? persistedState.transactions.map((transaction) => ({
+          ...transaction,
+          items: mergeArrayField(transaction?.items, []),
+        }))
+      : persistedState.transactions,
+    purchaseOrders: Array.isArray(persistedState.purchaseOrders)
+      ? persistedState.purchaseOrders.map((order) => ({
+          ...order,
+          items: mergeArrayField(order?.items, []),
+        }))
+      : persistedState.purchaseOrders,
+    settings: persistedState.settings
+      ? {
+          ...persistedState.settings,
+          paymentMethods: mergeArrayField(persistedState.settings.paymentMethods, initialData.settings.paymentMethods),
+          servicePoints: mergeArrayField(persistedState.settings.servicePoints, initialData.settings.servicePoints),
+        }
+      : persistedState.settings,
+  };
+};
+
 export const useAppStore = create<AppStore>()(
   persist(
     (set) => ({
@@ -248,6 +303,10 @@ export const useAppStore = create<AppStore>()(
     {
       name: 'qla-clinic-storage',
       storage: createJSONStorage(() => localStorage),
+      merge: (persistedState, currentState) => ({
+        ...currentState,
+        ...normalizePersistedState(persistedState as Partial<AppState> | undefined),
+      }),
       partialize: (state) => ({
         patients: state.patients,
         staff: state.staff,
