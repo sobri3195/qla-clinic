@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   BadgeCheck,
+  Boxes,
   Camera,
   ClipboardCheck,
   FilePenLine,
@@ -8,9 +9,12 @@ import {
   MessageSquareQuote,
   NotebookPen,
   PackageCheck,
+  ReceiptText,
   Send,
+  ShieldCheck,
   Sparkles,
   Stethoscope,
+  UserCog,
 } from 'lucide-react';
 import { PageShell } from '@/components/shared/page-shell';
 import { AccessGuard } from '@/components/shared/access-guard';
@@ -114,9 +118,29 @@ const supportiveFeatures = [
     icon: BadgeCheck,
   },
   {
-    title: 'Integrasi resep & skincare',
-    description: 'Dokter dapat langsung meresepkan produk, menghubungkan ke stok, dan memberi homecare setelah treatment.',
+    title: 'Integrasi SOAP dengan rekam medis elektronik',
+    description: 'Semua catatan SOAP langsung masuk ke rekam medis pasien, tersimpan kronologis, dan mudah dicari saat pasien datang kembali.',
     icon: NotebookPen,
+  },
+  {
+    title: 'Integrasi SOAP dengan billing',
+    description: 'Tindakan dari plan langsung masuk ke tagihan, resep dan produk diteruskan ke kasir, sehingga input ulang dapat dikurangi.',
+    icon: ReceiptText,
+  },
+  {
+    title: 'Integrasi SOAP dengan inventory',
+    description: 'Produk dan bahan treatment otomatis mengurangi stok agar pemakaian bahan medis maupun estetik tetap termonitor dan akurat.',
+    icon: Boxes,
+  },
+  {
+    title: 'Multiuser & hak akses',
+    description: 'Dokter, perawat, terapis, dan admin hanya melihat modul sesuai peran, dengan audit trail untuk menjaga keamanan data SOAP.',
+    icon: UserCog,
+  },
+  {
+    title: 'Laporan & evaluasi',
+    description: 'Pantau jumlah tindakan, diagnosis estetik terbanyak, treatment favorit, progres pasien, dan produktivitas dokter atau terapis.',
+    icon: ShieldCheck,
   },
   {
     title: 'Paket treatment & membership',

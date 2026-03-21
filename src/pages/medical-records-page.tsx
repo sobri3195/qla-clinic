@@ -1,4 +1,4 @@
-import { Camera, ClipboardList, Map, PackageCheck, Send, ShieldCheck, Sparkles, Stethoscope } from 'lucide-react';
+import { Boxes, Camera, ClipboardList, Map, PackageCheck, ReceiptText, Send, ShieldCheck, Sparkles, Stethoscope, UserCog } from 'lucide-react';
 import { PageShell } from '@/components/shared/page-shell';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -25,6 +25,31 @@ const supportingModules = [
     title: 'Informed consent digital',
     detail: 'Persetujuan tindakan digital, tanda tangan pasien, dan arsip consent otomatis per treatment.',
     icon: ShieldCheck,
+  },
+  {
+    title: 'Integrasi SOAP dengan rekam medis elektronik',
+    detail: 'Semua catatan SOAP langsung masuk ke rekam medis pasien, riwayat kunjungan tersimpan kronologis, dan mudah dicari saat pasien datang kembali.',
+    icon: ClipboardList,
+  },
+  {
+    title: 'Integrasi SOAP dengan billing',
+    detail: 'Tindakan dari plan otomatis menjadi tagihan, sedangkan resep dan produk diteruskan ke kasir untuk mengurangi input ulang.',
+    icon: ReceiptText,
+  },
+  {
+    title: 'Integrasi SOAP dengan inventory',
+    detail: 'Produk dan bahan treatment otomatis terpotong dari stok dengan monitoring pemakaian bahan medis dan estetik yang lebih rapi.',
+    icon: Boxes,
+  },
+  {
+    title: 'Multiuser & hak akses',
+    detail: 'Dokter, perawat, terapis, dan admin memperoleh akses sesuai peran, data SOAP tetap aman, dan aktivitas pengguna tercatat.',
+    icon: UserCog,
+  },
+  {
+    title: 'Laporan & evaluasi',
+    detail: 'Dashboard laporan mencakup jumlah tindakan, diagnosis estetik terbanyak, treatment favorit, progres pasien, serta produktivitas dokter atau terapis.',
+    icon: Stethoscope,
   },
   {
     title: 'Paket treatment & membership',
