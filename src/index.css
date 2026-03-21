@@ -22,6 +22,7 @@ body {
     radial-gradient(circle at top right, rgba(244, 223, 227, 0.92), transparent 32%),
     radial-gradient(circle at bottom left, rgba(248, 237, 240, 0.85), transparent 30%),
     linear-gradient(180deg, #fffdfb 0%, #fcf5f3 100%);
+  background-attachment: fixed;
 }
 
 #root {
@@ -31,6 +32,22 @@ body {
 img {
   display: block;
   max-width: 100%;
+}
+
+a {
+  transition: color 180ms ease;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(183, 125, 140, 0.24);
+  color: #352a2f;
 }
 
 ::-webkit-scrollbar {

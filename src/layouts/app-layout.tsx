@@ -15,8 +15,9 @@ import {
   Package2,
   Menu,
   ShieldCheck,
+  ArrowUpRight,
 } from 'lucide-react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useMemo, useState } from 'react';
 import { useAppStore } from '@/store/app-store';
@@ -52,9 +53,12 @@ const roleOptions: Role[] = ['Admin / Front Office', 'Dokter / Aesthetic Doctor'
 export function AppLayout() {
   const { currentUser, settings, followUps, appointments, queue, reminders, logout, switchRole } = useAppStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const allowedItems = useMemo(() => navItems.filter((item) => canAccessModule(currentUser?.role, item.module)), [currentUser?.role]);
   const mobileNavItems = useMemo(() => allowedItems.slice(0, 4), [allowedItems]);
+  const activeItem = useMemo(() => allowedItems.find((item) => item.to === location.pathname) ?? allowedItems[0], [allowedItems, location.pathname]);
+  const todayAppointments = appointments.filter((item) => item.date === new Date().toISOString().slice(0, 10) && item.status !== 'cancelled').length;
 
   const handleLogout = () => {
     logout();
@@ -62,24 +66,42 @@ export function AppLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent lg:flex">
-      {sidebarOpen && <button aria-label="Close sidebar overlay" className="fixed inset-0 z-20 bg-[#352a2f]/20 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />}
+    <div className="relative min-h-screen overflow-hidden bg-transparent lg:flex">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-[-8rem] top-[-7rem] h-56 w-56 rounded-full bg-primary/12 blur-3xl sm:h-72 sm:w-72" />
+        <div className="absolute right-[-6rem] top-24 h-48 w-48 rounded-full bg-[#f2d6b9]/35 blur-3xl sm:h-72 sm:w-72" />
+        <div className="absolute bottom-0 left-1/3 h-44 w-44 rounded-full bg-[#dfeeea] blur-3xl sm:h-64 sm:w-64" />
+      </div>
+
+      {sidebarOpen && <button aria-label="Close sidebar overlay" className="fixed inset-0 z-20 bg-[#352a2f]/25 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />}
       <motion.aside
         animate={{ x: 0 }}
         className={cn(
-          'fixed inset-y-0 left-0 z-30 flex w-[88vw] max-w-80 flex-col border-r border-white/60 bg-white/90 p-5 backdrop-blur lg:sticky lg:w-72',
+          'fixed inset-y-0 left-0 z-30 flex w-[88vw] max-w-80 flex-col border-r border-white/60 bg-white/85 p-5 backdrop-blur-xl lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:bg-white/72',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
         <div className="mb-8">
           <BrandLogo />
-          <div className="mt-5 rounded-[24px] border border-white/70 bg-hero-gradient p-4">
-            <div className="flex items-center justify-between gap-3">
+          <div className="mt-5 overflow-hidden rounded-[28px] border border-white/80 bg-hero-gradient p-4 shadow-soft">
+            <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold">Premium Care Workflow</p>
-                <p className="mt-1 text-xs text-muted">Arrival → consultation → treatment → cashier → follow-up.</p>
+                <p className="mt-1 text-xs leading-5 text-muted">Arrival → consultation → treatment → cashier → follow-up.</p>
               </div>
-              <ShieldCheck className="h-5 w-5 text-primary" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/80 text-primary shadow-sm">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+              <div className="rounded-2xl bg-white/70 px-3 py-2">
+                <p className="text-muted">Active visits</p>
+                <p className="mt-1 font-semibold text-foreground">{todayAppointments}</p>
+              </div>
+              <div className="rounded-2xl bg-white/70 px-3 py-2">
+                <p className="text-muted">Reminders</p>
+                <p className="mt-1 font-semibold text-foreground">{reminders.length}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -92,19 +114,28 @@ export function AppLayout() {
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition',
-                  isActive ? 'bg-secondary text-foreground shadow' : 'text-muted hover:bg-secondary/80'
+                  'group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition duration-200',
+                  isActive ? 'bg-[#352a2f] text-white shadow-soft' : 'text-muted hover:bg-white/80 hover:text-foreground'
                 )
               }
             >
-              <Icon className="h-4 w-4" />
-              <span>{label}</span>
+              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-secondary/80 transition group-hover:bg-secondary">
+                <Icon className="h-4 w-4" />
+              </span>
+              <span className="flex-1">{label}</span>
+              <ArrowUpRight className="h-3.5 w-3.5 opacity-40 transition group-hover:opacity-100" />
             </NavLink>
           ))}
         </nav>
 
-        <div className="mt-6 rounded-[24px] bg-[#352a2f] p-5 text-white">
-          <Badge variant="gold">Patient Flow</Badge>
+        <div className="mt-6 rounded-[28px] bg-[#352a2f] p-5 text-white shadow-soft">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <Badge variant="gold">Patient Flow</Badge>
+              <p className="mt-3 text-sm font-semibold">Satu dashboard untuk seluruh operasional klinik.</p>
+            </div>
+            <Sparkles className="h-5 w-5 text-white/80" />
+          </div>
           <ol className="mt-4 space-y-2 text-sm text-white/80">
             <li>1. Registrasi & validasi booking</li>
             <li>2. Check-in dan antrean realtime</li>
@@ -115,52 +146,69 @@ export function AppLayout() {
         </div>
       </motion.aside>
 
-      <div className="flex-1 px-3 pb-24 pt-3 sm:px-4 sm:pt-4 lg:p-6 lg:pb-6">
-        <header className="mb-6 space-y-4 rounded-[28px] border border-white/60 bg-white/80 p-4 shadow-soft backdrop-blur">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex items-center gap-3">
-              <Button variant="secondary" size="icon" className="lg:hidden" onClick={() => setSidebarOpen((prev) => !prev)}>
-                <Menu className="h-4 w-4" />
-              </Button>
-              <div className="relative flex-1 xl:w-[420px]">
-                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-                <Input className="pl-10" placeholder="Cari pasien, treatment, invoice, staff..." />
-              </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 xl:flex xl:flex-wrap xl:items-center">
-              <div className="rounded-2xl bg-secondary px-4 py-3 text-sm text-foreground">
-                <p className="font-medium">{settings.systemName}</p>
-                <p className="text-xs text-muted">{settings.openingHours} • Reminder {reminders.length}</p>
-              </div>
-              <div className="rounded-2xl bg-secondary px-4 py-3 text-sm">
-                <p className="font-medium">{appointments.filter((item) => item.status !== 'cancelled').length} active visits</p>
-                <p className="text-xs text-muted">Queue {queue.length} • Follow-up {followUps.length}</p>
-              </div>
-              <Button variant="secondary" size="icon" className="relative hidden xl:inline-flex">
-                <Bell className="h-4 w-4" />
-                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary" />
-              </Button>
-            </div>
-          </div>
-
-          <div className="grid gap-3 xl:grid-cols-[1fr_auto] xl:items-center">
-            <div className="grid gap-3 md:grid-cols-3">
-              {[
-                ['Role aktif', currentUser?.role ?? '-'],
-                ['Service point', `${settings.servicePoints.length} area aktif`],
-                ['Akses modul', `${allowedItems.length} modul tersedia`],
-              ].map(([label, value]) => (
-                <div key={label} className="rounded-2xl border border-border/70 px-4 py-3 text-sm">
-                  <p className="text-xs uppercase tracking-[0.18em] text-muted">{label}</p>
-                  <p className="mt-2 font-medium text-foreground">{value}</p>
+      <div className="relative z-10 flex-1 px-3 pb-24 pt-3 sm:px-4 sm:pt-4 lg:p-6 lg:pb-6">
+        <header className="mb-6 overflow-hidden rounded-[32px] border border-white/60 bg-white/75 p-4 shadow-soft backdrop-blur-xl">
+          <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr] xl:items-start">
+            <div className="space-y-4">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex items-center gap-3">
+                  <Button variant="secondary" size="icon" className="lg:hidden" onClick={() => setSidebarOpen((prev) => !prev)}>
+                    <Menu className="h-4 w-4" />
+                  </Button>
+                  <div className="relative flex-1 lg:min-w-[320px] xl:w-[420px]">
+                    <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+                    <Input className="border-white/70 bg-white/85 pl-10" placeholder="Cari pasien, treatment, invoice, staff..." />
+                  </div>
                 </div>
-              ))}
+
+                <div className="grid gap-3 sm:grid-cols-2 xl:flex xl:flex-wrap xl:items-center">
+                  <div className="rounded-2xl border border-white/70 bg-white/75 px-4 py-3 text-sm text-foreground">
+                    <p className="font-medium">{settings.systemName}</p>
+                    <p className="text-xs text-muted">{settings.openingHours} • Reminder {reminders.length}</p>
+                  </div>
+                  <div className="rounded-2xl border border-white/70 bg-white/75 px-4 py-3 text-sm">
+                    <p className="font-medium">{appointments.filter((item) => item.status !== 'cancelled').length} active visits</p>
+                    <p className="text-xs text-muted">Queue {queue.length} • Follow-up {followUps.length}</p>
+                  </div>
+                  <Button variant="secondary" size="icon" className="relative hidden xl:inline-flex">
+                    <Bell className="h-4 w-4" />
+                    <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid gap-3 lg:grid-cols-[1.2fr_0.8fr]">
+                <div className="rounded-[28px] border border-white/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(248,237,240,0.88),rgba(247,235,231,0.9))] p-5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="gold">Live workspace</Badge>
+                    <Badge variant="pink">Responsive dashboard</Badge>
+                  </div>
+                  <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground sm:text-[2rem]">
+                    {activeItem?.label ?? 'Clinic overview'} dengan tampilan yang lebih modern, ringan, dan nyaman di semua ukuran layar.
+                  </h2>
+                  <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
+                    Gunakan pencarian, role switch, dan akses modul cepat untuk berpindah antar proses tanpa kehilangan konteks operasional harian.
+                  </p>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                  {[
+                    ['Role aktif', currentUser?.role ?? '-'],
+                    ['Service point', `${settings.servicePoints.length} area aktif`],
+                    ['Akses modul', `${allowedItems.length} modul tersedia`],
+                  ].map(([label, value]) => (
+                    <div key={label} className="rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-sm">
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted">{label}</p>
+                      <p className="mt-2 font-medium text-foreground">{value}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            <div className="flex flex-col gap-3 md:flex-row md:items-center">
+            <div className="flex flex-col gap-3 rounded-[28px] border border-white/70 bg-white/65 p-4 backdrop-blur">
               {currentUser && (
-                <div className="min-w-[250px] rounded-2xl border border-border bg-white/80 p-2">
+                <div className="rounded-2xl border border-border/80 bg-white/80 p-2">
                   <p className="px-2 pb-2 text-xs uppercase tracking-[0.18em] text-muted">Role quick switch</p>
                   <Select value={currentUser.role} onChange={(value) => switchRole(value as Role)} options={roleOptions.map((item) => ({ value: item, label: item }))} />
                 </div>
@@ -168,14 +216,14 @@ export function AppLayout() {
               {currentUser && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-3 rounded-2xl border border-border bg-white px-3 py-2 text-left">
+                    <button className="flex items-center gap-3 rounded-2xl border border-border/80 bg-white/90 px-3 py-3 text-left transition hover:-translate-y-0.5">
                       <Avatar>
                         <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
                         <AvatarFallback>{currentUser.name.slice(0, 2)}</AvatarFallback>
                       </Avatar>
-                      <div>
-                        <p className="text-sm font-medium">{currentUser.name}</p>
-                        <p className="text-xs text-muted">{currentUser.role}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">{currentUser.name}</p>
+                        <p className="truncate text-xs text-muted">{currentUser.role}</p>
                       </div>
                     </button>
                   </DropdownMenuTrigger>
@@ -187,6 +235,15 @@ export function AppLayout() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                <div className="rounded-2xl bg-secondary/90 p-4 text-sm">
+                  <p className="font-medium text-foreground">Today focus</p>
+                  <p className="mt-2 text-muted">Pantau antrean aktif, follow-up jatuh tempo, dan reminder agar transisi antar tim tetap mulus.</p>
+                </div>
+                <div className="rounded-2xl border border-dashed border-border bg-white/70 p-4 text-sm text-muted">
+                  Aktivitas paling efektif saat ini: validasi booking pagi, review queue, dan follow-up pasca treatment.
+                </div>
+              </div>
             </div>
           </div>
         </header>
@@ -203,7 +260,7 @@ export function AppLayout() {
                 className={({ isActive }) =>
                   cn(
                     'flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-center text-[11px] font-medium transition',
-                    isActive ? 'bg-secondary text-foreground shadow-sm' : 'text-muted hover:bg-secondary/70'
+                    isActive ? 'bg-[#352a2f] text-white shadow-sm' : 'text-muted hover:bg-secondary/70'
                   )
                 }
               >
