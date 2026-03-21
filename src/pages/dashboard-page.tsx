@@ -1,4 +1,4 @@
-import { Activity, CalendarDays, CreditCard, Users, Sparkles, BellRing, ShieldCheck, Smartphone } from 'lucide-react';
+import { Activity, CalendarDays, CreditCard, Users, Sparkles, BellRing, ShieldCheck, Smartphone, ArrowUpRight, HeartHandshake, CalendarClock } from 'lucide-react';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageShell } from '@/components/shared/page-shell';
 import { StatCard } from '@/components/shared/stat-card';
@@ -33,15 +33,35 @@ export function DashboardPage() {
 
   return (
     <PageShell title="Dashboard" description="Ringkasan operasional QLA Clinic hari ini: branding premium, patient journey yang jelas, akses per role, CRUD operasional, dan tampilan responsive.">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="Patients today" value={`${patients.length}`} hint="Active profiles with loyalty & referral" icon={Users} />
-        <StatCard title="Appointments today" value={`${appointments.filter((item) => item.date === new Date().toISOString().slice(0, 10)).length}`} hint={`${waitlistCount} waiting list monitored`} icon={CalendarDays} />
-        <StatCard title="Active queue" value={`${queue.length}`} hint="Status auto-progression enabled" icon={Activity} />
-        <StatCard title="Daily revenue" value={formatCurrency(todayRevenue)} hint="Stock + loyalty synced to cashier" icon={CreditCard} />
-      </div>
+      <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+        <Card className="overflow-hidden bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(248,237,240,0.94),rgba(247,235,231,0.9))]">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="gold">Executive overview</Badge>
+            <Badge variant="green">Live today</Badge>
+          </div>
+          <h2 className="mt-4 max-w-3xl text-2xl font-semibold tracking-tight sm:text-[2rem]">
+            Operasional hari ini terlihat lebih rapi, informatif, dan jauh lebih nyaman dibaca pada layar desktop maupun mobile.
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
+            Fokus utama hari ini adalah menjaga arus pasien tetap lancar dari appointment, antrean, konsultasi, hingga pembayaran dan follow-up.
+          </p>
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            {[
+              ['Queue terpantau', `${queue.length} pasien aktif di antrean`, Activity],
+              ['Booking terkendali', `${waitlistCount} pasien menunggu slot`, CalendarClock],
+              ['Service premium', `${followUps.length} follow-up siap dijalankan`, HeartHandshake],
+            ].map(([title, text, Icon]) => (
+              <div key={title} className="rounded-[24px] border border-white/70 bg-white/70 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-primary">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <p className="mt-4 font-medium">{title}</p>
+                <p className="mt-2 text-sm text-muted">{text}</p>
+              </div>
+            ))}
+          </div>
+        </Card>
 
-      <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-        <PatientJourney />
         <Card>
           <CardHeader>
             <div>
@@ -67,6 +87,39 @@ export function DashboardPage() {
                     <p className="mt-1 text-sm text-muted">{text}</p>
                   </div>
                 </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <StatCard title="Patients today" value={`${patients.length}`} hint="Active profiles with loyalty & referral" icon={Users} />
+        <StatCard title="Appointments today" value={`${appointments.filter((item) => item.date === new Date().toISOString().slice(0, 10)).length}`} hint={`${waitlistCount} waiting list monitored`} icon={CalendarDays} />
+        <StatCard title="Active queue" value={`${queue.length}`} hint="Status auto-progression enabled" icon={Activity} />
+        <StatCard title="Daily revenue" value={formatCurrency(todayRevenue)} hint="Stock + loyalty synced to cashier" icon={CreditCard} />
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+        <PatientJourney />
+        <Card>
+          <CardHeader>
+            <div>
+              <CardTitle>Quick pulse</CardTitle>
+              <CardDescription>Snapshot singkat untuk membantu owner atau supervisor membaca kondisi hari ini.</CardDescription>
+            </div>
+            <ArrowUpRight className="h-5 w-5 text-primary" />
+          </CardHeader>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+            {[
+              ['Reminder siap kirim', `${reminders.length} campaign / reminder aktif`],
+              ['Audit trail', `${auditLogs.length} perubahan data tercatat`],
+              ['Treatment favorit', topTreatment.name],
+              ['Package highlight', treatmentPackages[0]?.name ?? '-'],
+            ].map(([title, text]) => (
+              <div key={title} className="rounded-[24px] border border-border p-4">
+                <p className="font-medium">{title}</p>
+                <p className="mt-2 text-sm text-muted">{text}</p>
               </div>
             ))}
           </div>
@@ -154,10 +207,10 @@ export function DashboardPage() {
             </div>
             <div className="space-y-3">
               {staff.slice(0, 4).map((member) => (
-                <div key={member.id} className="flex items-center justify-between rounded-2xl border border-border p-4">
-                  <div>
-                    <p className="font-medium">{member.name}</p>
-                    <p className="text-sm text-muted">{member.specialty}</p>
+                <div key={member.id} className="flex items-center justify-between gap-3 rounded-2xl border border-border p-4">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{member.name}</p>
+                    <p className="truncate text-sm text-muted">{member.specialty}</p>
                   </div>
                   <Badge variant="green">{member.rating} / 5</Badge>
                 </div>
