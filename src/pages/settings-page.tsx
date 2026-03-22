@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Save, ShieldCheck, Smartphone, Workflow } from 'lucide-react';
+import { Save, ShieldCheck, Smartphone } from 'lucide-react';
 import { PageShell } from '@/components/shared/page-shell';
 import { AccessGuard } from '@/components/shared/access-guard';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,7 @@ export function SettingsPage() {
 
   return (
     <AccessGuard module="settings">
-      <PageShell title="System Settings" description="Konfigurasi klinik, permission matrix per role, reminder center, service point capacity, dan audit log untuk kesiapan production.">
+      <PageShell title="System Settings" description="Konfigurasi utama klinik.">
         <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-4">
             <Card>
@@ -52,7 +52,7 @@ export function SettingsPage() {
                 <ShieldCheck className="h-5 w-5 text-primary" />
                 <div>
                   <h3 className="text-lg font-semibold">Permission matrix per role</h3>
-                  <p className="mt-1 text-sm text-muted">Role quick switch di header terhubung ke matrix ini untuk simulasi multi akses level.</p>
+                  <p className="mt-1 text-sm text-muted">Preview akses tiap role.</p>
                 </div>
               </div>
               <div className="mt-4 space-y-3 text-sm">
@@ -76,35 +76,10 @@ export function SettingsPage() {
           <div className="space-y-4">
             <Card>
               <div className="flex items-center gap-3">
-                <Workflow className="h-5 w-5 text-primary" />
-                <div>
-                  <h3 className="text-lg font-semibold">Improvement checklist</h3>
-                  <p className="mt-1 text-sm text-muted">Perubahan utama yang diminta kini dirangkum di satu panel.</p>
-                </div>
-              </div>
-              <div className="mt-4 grid gap-3">
-                {[
-                  ['Logo & favicon', 'Branding baru aktif di browser dan aplikasi.'],
-                  ['UI/UX lebih menarik', 'Header, sidebar, dashboard, dan login dibuat lebih premium.'],
-                  ['Alur pasien jelas', 'Patient journey divisualkan dari registrasi hingga follow-up.'],
-                  ['Multi akses level', 'Quick role switch + permission matrix.'],
-                  ['CRUD operasional', 'Pasien, staf, dan produk sudah bisa create, update, delete.'],
-                  ['Responsive mobile', 'Tabel penting punya fallback card untuk layar kecil.'],
-                ].map(([title, detail]) => (
-                  <div key={title} className="rounded-2xl border border-border p-4 text-sm">
-                    <p className="font-medium">{title}</p>
-                    <p className="mt-2 text-muted">{detail}</p>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            <Card>
-              <div className="flex items-center gap-3">
                 <Smartphone className="h-5 w-5 text-primary" />
                 <div>
                   <h3 className="text-lg font-semibold">Reminder center</h3>
-                  <p className="mt-1 text-sm text-muted">Tetap responsif dan mudah dibaca saat dibuka dari tablet atau mobile.</p>
+                  <p className="mt-1 text-sm text-muted">Daftar reminder terbaru.</p>
                 </div>
               </div>
               <div className="mt-4 space-y-3">

@@ -16,6 +16,7 @@ import {
   Menu,
   ShieldCheck,
   ArrowUpRight,
+  X,
 } from 'lucide-react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -59,6 +60,12 @@ export function AppLayout() {
   const mobileNavItems = useMemo(() => allowedItems.slice(0, 4), [allowedItems]);
   const activeItem = useMemo(() => allowedItems.find((item) => item.to === location.pathname) ?? allowedItems[0], [allowedItems, location.pathname]);
   const todayAppointments = appointments.filter((item) => item.date === new Date().toISOString().slice(0, 10) && item.status !== 'cancelled').length;
+  const quickStats = [
+    { label: 'Kunjungan aktif', value: `${todayAppointments}` },
+    { label: 'Antrean', value: `${queue.length}` },
+    { label: 'Follow-up', value: `${followUps.length}` },
+    { label: 'Reminder', value: `${reminders.length}` },
+  ];
 
   const handleLogout = () => {
     logout();
@@ -77,32 +84,34 @@ export function AppLayout() {
       <motion.aside
         animate={{ x: 0 }}
         className={cn(
-          'fixed inset-y-0 left-0 z-30 flex w-[88vw] max-w-80 flex-col border-r border-white/60 bg-white/85 p-5 backdrop-blur-xl lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:bg-white/72',
+          'fixed inset-y-0 left-0 z-30 flex w-[88vw] max-w-80 flex-col border-r border-white/60 bg-white/92 p-4 backdrop-blur-xl lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:bg-white/72 lg:p-5',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
-        <div className="mb-8">
+        <div className="mb-6 flex items-start justify-between gap-3">
           <BrandLogo />
-          <div className="mt-5 overflow-hidden rounded-[28px] border border-white/80 bg-hero-gradient p-4 shadow-soft">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold">Premium Care Workflow</p>
-                <p className="mt-1 text-xs leading-5 text-muted">Arrival → consultation → treatment → cashier → follow-up.</p>
-              </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/80 text-primary shadow-sm">
-                <ShieldCheck className="h-5 w-5" />
-              </div>
+          <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSidebarOpen(false)}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="mb-6 rounded-[28px] border border-white/80 bg-hero-gradient p-4 shadow-soft">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold">Ringkasan hari ini</p>
+              <p className="mt-1 text-xs text-muted">{settings.openingHours}</p>
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-              <div className="rounded-2xl bg-white/70 px-3 py-2">
-                <p className="text-muted">Active visits</p>
-                <p className="mt-1 font-semibold text-foreground">{todayAppointments}</p>
-              </div>
-              <div className="rounded-2xl bg-white/70 px-3 py-2">
-                <p className="text-muted">Reminders</p>
-                <p className="mt-1 font-semibold text-foreground">{reminders.length}</p>
-              </div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/80 text-primary shadow-sm">
+              <ShieldCheck className="h-5 w-5" />
             </div>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+            {quickStats.slice(0, 4).map((item) => (
+              <div key={item.label} className="rounded-2xl bg-white/70 px-3 py-2">
+                <p className="text-muted">{item.label}</p>
+                <p className="mt-1 font-semibold text-foreground">{item.value}</p>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -127,89 +136,58 @@ export function AppLayout() {
             </NavLink>
           ))}
         </nav>
-
-        <div className="mt-6 rounded-[28px] bg-[#352a2f] p-5 text-white shadow-soft">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <Badge variant="gold">Patient Flow</Badge>
-              <p className="mt-3 text-sm font-semibold">Satu dashboard untuk seluruh operasional klinik.</p>
-            </div>
-            <Sparkles className="h-5 w-5 text-white/80" />
-          </div>
-          <ol className="mt-4 space-y-2 text-sm text-white/80">
-            <li>1. Registrasi & validasi booking</li>
-            <li>2. Check-in dan antrean realtime</li>
-            <li>3. Konsultasi & SOAP note</li>
-            <li>4. Treatment, produk, dan billing</li>
-            <li>5. Reminder, loyalty, dan audit</li>
-          </ol>
-        </div>
       </motion.aside>
 
       <div className="relative z-10 flex-1 px-3 pb-24 pt-3 sm:px-4 sm:pt-4 lg:p-6 lg:pb-6">
-        <header className="mb-6 overflow-hidden rounded-[32px] border border-white/60 bg-white/75 p-4 shadow-soft backdrop-blur-xl">
-          <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr] xl:items-start">
+        <header className="mb-6 overflow-hidden rounded-[28px] border border-white/60 bg-white/80 p-4 shadow-soft backdrop-blur-xl sm:p-5">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)] xl:items-start">
             <div className="space-y-4">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                 <div className="flex items-center gap-3">
-                  <Button variant="secondary" size="icon" className="lg:hidden" onClick={() => setSidebarOpen((prev) => !prev)}>
+                  <Button variant="secondary" size="icon" className="shrink-0 lg:hidden" onClick={() => setSidebarOpen((prev) => !prev)}>
                     <Menu className="h-4 w-4" />
                   </Button>
-                  <div className="relative flex-1 lg:min-w-[320px] xl:w-[420px]">
+                  <div className="relative min-w-0 flex-1 xl:w-[420px]">
                     <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-                    <Input className="border-white/70 bg-white/85 pl-10" placeholder="Cari pasien, treatment, invoice, staff..." />
+                    <Input className="h-11 border-white/70 bg-white/90 pl-10" placeholder="Cari pasien, treatment, invoice, staff..." />
                   </div>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2 xl:flex xl:flex-wrap xl:items-center">
-                  <div className="rounded-2xl border border-white/70 bg-white/75 px-4 py-3 text-sm text-foreground">
-                    <p className="font-medium">{settings.systemName}</p>
-                    <p className="text-xs text-muted">{settings.openingHours} • Reminder {reminders.length}</p>
-                  </div>
+                <div className="flex items-center justify-between gap-3 sm:justify-start xl:hidden">
                   <div className="rounded-2xl border border-white/70 bg-white/75 px-4 py-3 text-sm">
-                    <p className="font-medium">{appointments.filter((item) => item.status !== 'cancelled').length} active visits</p>
-                    <p className="text-xs text-muted">Queue {queue.length} • Follow-up {followUps.length}</p>
+                    <p className="font-medium">{settings.systemName}</p>
+                    <p className="text-xs text-muted">{currentUser?.role ?? '-'}</p>
                   </div>
-                  <Button variant="secondary" size="icon" className="relative hidden xl:inline-flex">
+                  <Button variant="secondary" size="icon" className="relative shrink-0">
                     <Bell className="h-4 w-4" />
                     <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary" />
                   </Button>
                 </div>
               </div>
 
-              <div className="grid gap-3 lg:grid-cols-[1.2fr_0.8fr]">
-                <div className="rounded-[28px] border border-white/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(248,237,240,0.88),rgba(247,235,231,0.9))] p-5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="gold">Live workspace</Badge>
-                    <Badge variant="pink">Responsive dashboard</Badge>
-                  </div>
-                  <h2 className="mt-4 text-2xl font-semibold tracking-tight text-foreground sm:text-[2rem]">
-                    {activeItem?.label ?? 'Clinic overview'} dengan tampilan yang lebih modern, ringan, dan nyaman di semua ukuran layar.
-                  </h2>
-                  <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-                    Gunakan pencarian, role switch, dan akses modul cepat untuk berpindah antar proses tanpa kehilangan konteks operasional harian.
-                  </p>
+              <div className="rounded-[24px] border border-white/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.94),rgba(248,237,240,0.88),rgba(247,235,231,0.9))] p-4 sm:p-5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="gold">{activeItem?.label ?? 'Clinic overview'}</Badge>
+                  <Badge variant="slate">{allowedItems.length} modul</Badge>
                 </div>
-
-                <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                  {[
-                    ['Role aktif', currentUser?.role ?? '-'],
-                    ['Service point', `${settings.servicePoints.length} area aktif`],
-                    ['Akses modul', `${allowedItems.length} modul tersedia`],
-                  ].map(([label, value]) => (
-                    <div key={label} className="rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-sm">
-                      <p className="text-xs uppercase tracking-[0.18em] text-muted">{label}</p>
-                      <p className="mt-2 font-medium text-foreground">{value}</p>
+                <h2 className="mt-4 text-xl font-semibold tracking-tight text-foreground sm:text-2xl lg:text-[2rem]">
+                  Workspace klinik yang ringkas, rapi, dan nyaman dipakai di desktop maupun mobile.
+                </h2>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  {quickStats.map((item) => (
+                    <div key={item.label} className="rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-sm">
+                      <p className="text-xs uppercase tracking-[0.18em] text-muted">{item.label}</p>
+                      <p className="mt-2 font-medium text-foreground">{item.value}</p>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 rounded-[28px] border border-white/70 bg-white/65 p-4 backdrop-blur">
+            <div className="flex flex-col gap-3 rounded-[24px] border border-white/70 bg-white/70 p-4 backdrop-blur">
               {currentUser && (
                 <div className="rounded-2xl border border-border/80 bg-white/80 p-2">
-                  <p className="px-2 pb-2 text-xs uppercase tracking-[0.18em] text-muted">Role quick switch</p>
+                  <p className="px-2 pb-2 text-xs uppercase tracking-[0.18em] text-muted">Role</p>
                   <Select value={currentUser.role} onChange={(value) => switchRole(value as Role)} options={roleOptions.map((item) => ({ value: item, label: item }))} />
                 </div>
               )}
@@ -235,13 +213,14 @@ export function AppLayout() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                <div className="rounded-2xl bg-secondary/90 p-4 text-sm">
-                  <p className="font-medium text-foreground">Today focus</p>
-                  <p className="mt-2 text-muted">Pantau antrean aktif, follow-up jatuh tempo, dan reminder agar transisi antar tim tetap mulus.</p>
+              <div className="hidden xl:grid xl:grid-cols-2 xl:gap-3">
+                <div className="rounded-2xl border border-white/70 bg-white/75 px-4 py-3 text-sm text-foreground">
+                  <p className="font-medium">{settings.systemName}</p>
+                  <p className="text-xs text-muted">{settings.openingHours}</p>
                 </div>
-                <div className="rounded-2xl border border-dashed border-border bg-white/70 p-4 text-sm text-muted">
-                  Aktivitas paling efektif saat ini: validasi booking pagi, review queue, dan follow-up pasca treatment.
+                <div className="rounded-2xl border border-white/70 bg-white/75 px-4 py-3 text-sm">
+                  <p className="font-medium">{appointments.filter((item) => item.status !== 'cancelled').length} active visits</p>
+                  <p className="text-xs text-muted">Queue {queue.length} • Follow-up {followUps.length}</p>
                 </div>
               </div>
             </div>
@@ -251,7 +230,7 @@ export function AppLayout() {
       </div>
 
       {mobileNavItems.length > 0 && (
-        <nav className="fixed inset-x-3 bottom-3 z-20 rounded-[28px] border border-white/70 bg-white/95 p-2 shadow-soft backdrop-blur lg:hidden">
+        <nav className="fixed inset-x-3 bottom-3 z-20 rounded-[24px] border border-white/70 bg-white/95 p-2 shadow-soft backdrop-blur lg:hidden">
           <div className="grid grid-cols-5 gap-2">
             {mobileNavItems.map(({ label, to, icon: Icon }) => (
               <NavLink
