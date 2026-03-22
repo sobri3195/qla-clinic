@@ -1,4 +1,4 @@
-import { Activity, CalendarDays, CreditCard, Users, Sparkles, BellRing, ShieldCheck, Smartphone, ArrowUpRight, HeartHandshake, CalendarClock } from 'lucide-react';
+import { Activity, CalendarDays, CreditCard, Users, Sparkles, BellRing, ArrowUpRight } from 'lucide-react';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageShell } from '@/components/shared/page-shell';
 import { StatCard } from '@/components/shared/stat-card';
@@ -9,7 +9,7 @@ import { useAppStore } from '@/store/app-store';
 import { formatCurrency, calculateTransactionTotal } from '@/lib/utils';
 
 export function DashboardPage() {
-  const { patients, appointments, queue, transactions, staff, followUps, treatments, reminders, auditLogs, treatmentPackages, currentUser } = useAppStore();
+  const { patients, appointments, queue, transactions, staff, followUps, treatments, reminders, auditLogs, treatmentPackages } = useAppStore();
   const todayRevenue = transactions
     .filter((transaction) => transaction.date === new Date().toISOString().slice(0, 10))
     .reduce((sum, transaction) => {
@@ -32,81 +32,21 @@ export function DashboardPage() {
   const consentedGalleryCount = patients.flatMap((patient) => patient.beforeAfter).filter((entry) => entry.consentUsage).length;
 
   return (
-    <PageShell title="Dashboard" description="Ringkasan operasional QLA Clinic hari ini: branding premium, patient journey yang jelas, akses per role, CRUD operasional, dan tampilan responsive.">
-      <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-        <Card className="overflow-hidden bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(248,237,240,0.94),rgba(247,235,231,0.9))]">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="gold">Executive overview</Badge>
-            <Badge variant="green">Live today</Badge>
-          </div>
-          <h2 className="mt-4 max-w-3xl text-2xl font-semibold tracking-tight sm:text-[2rem]">
-            Operasional hari ini terlihat lebih rapi, informatif, dan jauh lebih nyaman dibaca pada layar desktop maupun mobile.
-          </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-            Fokus utama hari ini adalah menjaga arus pasien tetap lancar dari appointment, antrean, konsultasi, hingga pembayaran dan follow-up.
-          </p>
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            {[
-              ['Queue terpantau', `${queue.length} pasien aktif di antrean`, Activity],
-              ['Booking terkendali', `${waitlistCount} pasien menunggu slot`, CalendarClock],
-              ['Service premium', `${followUps.length} follow-up siap dijalankan`, HeartHandshake],
-            ].map(([title, text, Icon]) => (
-              <div key={title} className="rounded-[24px] border border-white/70 bg-white/70 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-primary">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <p className="mt-4 font-medium">{title}</p>
-                <p className="mt-2 text-sm text-muted">{text}</p>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div>
-              <CardTitle>System highlights</CardTitle>
-              <CardDescription>Transformasi utama yang sekarang langsung terlihat pada aplikasi.</CardDescription>
-            </div>
-            <Badge variant="gold">What changed</Badge>
-          </CardHeader>
-          <div className="grid gap-3">
-            {[
-              ['Logo & favicon baru', 'Brand QLA kini konsisten di halaman login, sidebar, dan browser tab.', ShieldCheck],
-              ['Multi akses level', `Role aktif sekarang bisa diuji cepat sebagai ${currentUser?.role ?? '-'}.`, Sparkles],
-              ['CRUD operasional', 'Pasien, staf, dan produk dapat ditambah, diubah, dan dihapus.', Activity],
-              ['Responsive mobile', 'Layout, kartu ringkasan, dan daftar data kini lebih nyaman di layar kecil.', Smartphone],
-            ].map(([title, text, Icon]) => (
-              <div key={title} className="rounded-[24px] border border-border p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary text-primary">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="font-medium">{title}</p>
-                    <p className="mt-1 text-sm text-muted">{text}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-      </div>
-
+    <PageShell title="Dashboard" description="Ringkasan operasional harian QLA Clinic.">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="Patients today" value={`${patients.length}`} hint="Active profiles with loyalty & referral" icon={Users} />
-        <StatCard title="Appointments today" value={`${appointments.filter((item) => item.date === new Date().toISOString().slice(0, 10)).length}`} hint={`${waitlistCount} waiting list monitored`} icon={CalendarDays} />
-        <StatCard title="Active queue" value={`${queue.length}`} hint="Status auto-progression enabled" icon={Activity} />
-        <StatCard title="Daily revenue" value={formatCurrency(todayRevenue)} hint="Stock + loyalty synced to cashier" icon={CreditCard} />
+        <StatCard title="Patients today" value={`${patients.length}`} hint="Profil aktif dengan loyalty & referral" icon={Users} />
+        <StatCard title="Appointments today" value={`${appointments.filter((item) => item.date === new Date().toISOString().slice(0, 10)).length}`} hint={`${waitlistCount} waiting list dipantau`} icon={CalendarDays} />
+        <StatCard title="Active queue" value={`${queue.length}`} hint="Status antrean berjalan realtime" icon={Activity} />
+        <StatCard title="Daily revenue" value={formatCurrency(todayRevenue)} hint="Stok dan loyalty sinkron" icon={CreditCard} />
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+      <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
         <PatientJourney />
         <Card>
           <CardHeader>
             <div>
               <CardTitle>Quick pulse</CardTitle>
-              <CardDescription>Snapshot singkat untuk membantu owner atau supervisor membaca kondisi hari ini.</CardDescription>
+              <CardDescription>Snapshot singkat kondisi hari ini.</CardDescription>
             </div>
             <ArrowUpRight className="h-5 w-5 text-primary" />
           </CardHeader>
@@ -131,9 +71,9 @@ export function DashboardPage() {
           <CardHeader>
             <div>
               <CardTitle>Revenue trend</CardTitle>
-              <CardDescription>Statistik dummy pendapatan klinik sepanjang minggu ini.</CardDescription>
+              <CardDescription>Statistik pendapatan mingguan.</CardDescription>
             </div>
-            <Badge variant="gold">Premium insights</Badge>
+            <Badge variant="gold">Weekly</Badge>
           </CardHeader>
           <RevenueChart />
         </Card>
@@ -153,7 +93,7 @@ export function DashboardPage() {
           <CardHeader>
             <div>
               <CardTitle>Beauty goals tracker</CardTitle>
-              <CardDescription>Snapshot target kecantikan pasien yang paling sering diminta untuk membantu campaign dan bundling treatment.</CardDescription>
+              <CardDescription>Target pasien yang paling sering muncul.</CardDescription>
             </div>
             <Sparkles className="h-5 w-5 text-primary" />
           </CardHeader>
@@ -162,7 +102,7 @@ export function DashboardPage() {
               <div key={goal} className="rounded-[24px] border border-border p-5">
                 <p className="text-sm text-muted">Beauty goal</p>
                 <h3 className="mt-2 text-lg font-semibold">{goal}</h3>
-                <p className="mt-2 text-sm text-muted">{count} pasien aktif menargetkan outcome ini.</p>
+                <p className="mt-2 text-sm text-muted">{count} pasien aktif.</p>
               </div>
             ))}
           </div>
@@ -172,19 +112,19 @@ export function DashboardPage() {
           <CardHeader>
             <div>
               <CardTitle>Beauty care adherence</CardTitle>
-              <CardDescription>Kedisiplinan homecare dan aset konten before-after yang siap dipakai untuk follow-up premium.</CardDescription>
+              <CardDescription>Homecare dan aset before-after.</CardDescription>
             </div>
           </CardHeader>
           <div className="space-y-4">
             <div className="rounded-[24px] bg-secondary p-5">
               <p className="text-sm text-muted">Average routine compliance</p>
               <h3 className="mt-2 text-3xl font-semibold">{averageRoutineCompliance}%</h3>
-              <p className="mt-2 text-sm text-muted">Digabung dari kepatuhan homecare seluruh pasien aktif.</p>
+              <p className="mt-2 text-sm text-muted">Kepatuhan homecare seluruh pasien aktif.</p>
             </div>
             <div className="rounded-[24px] border border-border p-5">
               <p className="text-sm text-muted">Consented before-after gallery</p>
               <h3 className="mt-2 text-3xl font-semibold">{consentedGalleryCount} assets</h3>
-              <p className="mt-2 text-sm text-muted">Bisa dipakai untuk edukasi treatment dan social proof internal klinik.</p>
+              <p className="mt-2 text-sm text-muted">Siap dipakai untuk edukasi internal.</p>
             </div>
           </div>
         </Card>
@@ -195,7 +135,7 @@ export function DashboardPage() {
           <CardHeader>
             <div>
               <CardTitle>Top treatment & package</CardTitle>
-              <CardDescription>Treatment terlaris, bundle program, dan performa staf yang bertugas.</CardDescription>
+              <CardDescription>Treatment terlaris dan performa staf.</CardDescription>
             </div>
           </CardHeader>
           <div className="space-y-4">
@@ -203,7 +143,7 @@ export function DashboardPage() {
               <p className="text-sm text-muted">Most booked</p>
               <h3 className="mt-2 text-2xl font-semibold">{topTreatment.name}</h3>
               <p className="mt-2 text-sm text-muted">{topTreatment.category} • {formatCurrency(topTreatment.price)} • popularity {topTreatment.popularity}%</p>
-              <p className="mt-2 text-sm text-muted">Package highlight: {treatmentPackages[0]?.name}</p>
+              <p className="mt-2 text-sm text-muted">Package: {treatmentPackages[0]?.name}</p>
             </div>
             <div className="space-y-3">
               {staff.slice(0, 4).map((member) => (
@@ -222,7 +162,7 @@ export function DashboardPage() {
           <CardHeader>
             <div>
               <CardTitle>Staff performance</CardTitle>
-              <CardDescription>Skor kepuasan dan handling dummy per tenaga medis.</CardDescription>
+              <CardDescription>Skor kepuasan dan handling.</CardDescription>
             </div>
           </CardHeader>
           <StaffPerformanceChart />
@@ -231,7 +171,7 @@ export function DashboardPage() {
           <CardHeader>
             <div>
               <CardTitle>Notifications & audit</CardTitle>
-              <CardDescription>Reminder omnichannel dan jejak perubahan data.</CardDescription>
+              <CardDescription>Reminder dan jejak perubahan data.</CardDescription>
             </div>
             <BellRing className="h-5 w-5 text-primary" />
           </CardHeader>
