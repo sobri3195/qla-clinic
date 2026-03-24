@@ -38,21 +38,21 @@ const journeySteps = [
 export function PatientJourney({ className }: { className?: string }) {
   return (
     <Card className={cn('overflow-hidden p-0', className)}>
-      <div className="border-b border-white/70 px-5 py-5 sm:px-6">
+      <div className="border-b border-[#f0e8eb] px-5 py-5 sm:px-6">
         <p className="text-xs uppercase tracking-[0.3em] text-primary">Patient Journey</p>
-        <h3 className="mt-2 text-xl font-semibold">Alur pasien dari datang sampai follow-up.</h3>
+        <h3 className="mt-2 text-xl font-semibold tracking-tight">Alur pasien dari datang sampai follow-up.</h3>
       </div>
       <div className="grid gap-4 p-5 sm:p-6 xl:grid-cols-5">
         {journeySteps.map((step, index) => {
           const Icon = step.icon;
           return (
             <div key={step.title} className="relative">
-              <div className={cn('h-full rounded-[24px] border border-white/70 bg-gradient-to-br p-5', step.accent)}>
+              <div className={cn('h-full rounded-[24px] border border-[#efe5e9] bg-gradient-to-br p-5 shadow-[0_8px_24px_rgba(75,45,56,0.04)]', step.accent)}>
                 <div className="flex items-center justify-between gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/85 text-primary shadow-sm">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/90 text-primary shadow-sm">
                     <Icon className="h-5 w-5" />
                   </div>
-                  <span className="text-xs font-semibold uppercase tracking-[0.25em] text-muted">0{index + 1}</span>
+                  <span className="rounded-full bg-white/75 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">0{index + 1}</span>
                 </div>
                 <h4 className="mt-5 text-lg font-semibold">{step.title}</h4>
                 <p className="mt-2 text-sm leading-6 text-muted">{step.description}</p>

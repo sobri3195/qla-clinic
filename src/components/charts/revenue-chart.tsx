@@ -34,10 +34,13 @@ export function RevenueChart() {
             <stop offset="95%" stopColor="#b77d8c" stopOpacity={0.05} />
           </linearGradient>
         </defs>
-        <CartesianGrid stroke="#f3e6e9" vertical={false} />
+        <CartesianGrid stroke="#f1e7ea" vertical={false} />
         <XAxis dataKey="day" tick={{ fill: '#8d7e84', fontSize: 12 }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fill: '#8d7e84', fontSize: 12 }} axisLine={false} tickLine={false} />
-        <Tooltip />
+        <Tooltip
+          contentStyle={{ borderRadius: '14px', border: '1px solid #efe4e8', background: '#fff', boxShadow: '0 12px 28px rgba(53,42,47,0.08)' }}
+          formatter={(value: number) => [new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value), 'Revenue']}
+        />
         <Area type="monotone" dataKey="revenue" stroke="#b77d8c" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
       </AreaChart>
     </ResponsiveContainer>
@@ -46,14 +49,24 @@ export function RevenueChart() {
 
 export function FunnelChartCard() {
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <PieChart>
-        <Pie data={funnelData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={95} paddingAngle={3}>
-          {funnelData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
-        </Pie>
-        <Tooltip />
-      </PieChart>
-    </ResponsiveContainer>
+    <div className="space-y-4">
+      <ResponsiveContainer width="100%" height={220}>
+        <PieChart>
+          <Pie data={funnelData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={95} paddingAngle={3}>
+            {funnelData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+          </Pie>
+          <Tooltip contentStyle={{ borderRadius: '14px', border: '1px solid #efe4e8', background: '#fff' }} />
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {funnelData.map((item) => (
+          <div key={item.name} className="flex items-center justify-between rounded-xl border border-[#efe5e9] bg-[#fffafb] px-3 py-2 text-xs">
+            <span className="inline-flex items-center gap-2 text-muted"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} />{item.name}</span>
+            <span className="font-semibold text-foreground">{item.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -61,10 +74,10 @@ export function StaffPerformanceChart() {
   return (
     <ResponsiveContainer width="100%" height={280}>
       <BarChart data={performanceData}>
-        <CartesianGrid stroke="#f3e6e9" vertical={false} />
+        <CartesianGrid stroke="#f1e7ea" vertical={false} />
         <XAxis dataKey="name" tick={{ fill: '#8d7e84', fontSize: 12 }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fill: '#8d7e84', fontSize: 12 }} axisLine={false} tickLine={false} />
-        <Tooltip />
+        <Tooltip contentStyle={{ borderRadius: '14px', border: '1px solid #efe4e8', background: '#fff' }} />
         <Bar dataKey="value" fill="#c89b93" radius={[10, 10, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
