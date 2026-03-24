@@ -18,7 +18,6 @@ import {
   X,
 } from 'lucide-react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { useAppStore } from '@/store/app-store';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -105,10 +104,9 @@ export function AppLayout() {
 
       {sidebarOpen && <button aria-label="Close sidebar overlay" className="fixed inset-0 z-20 bg-[#352a2f]/25 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      <motion.aside
-        animate={{ x: 0 }}
+      <aside
         className={cn(
-          'fixed inset-y-2 left-2 z-30 flex w-[calc(100vw-1rem)] max-w-80 flex-col rounded-3xl border border-[#eee4e8] bg-[#fffdfd]/97 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[calc(env(safe-area-inset-top)+0.75rem)] shadow-[0_20px_45px_rgba(53,42,47,0.2)] backdrop-blur-xl lg:inset-y-0 lg:left-0 lg:rounded-none lg:border-r lg:border-l-0 lg:border-y-0 lg:shadow-none lg:pt-5 lg:pb-5 lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:p-5',
+          'fixed inset-y-2 left-2 z-30 flex w-[calc(100vw-1rem)] max-w-80 flex-col rounded-3xl border border-[#eee4e8] bg-[#fffdfd]/97 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[calc(env(safe-area-inset-top)+0.75rem)] shadow-[0_20px_45px_rgba(53,42,47,0.2)] backdrop-blur-xl transition-transform duration-300 ease-out lg:inset-y-0 lg:left-0 lg:rounded-none lg:border-r lg:border-l-0 lg:border-y-0 lg:shadow-none lg:pt-5 lg:pb-5 lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:p-5',
           sidebarOpen ? 'translate-x-0' : '-translate-x-[110%] lg:translate-x-0'
         )}
       >
@@ -170,7 +168,7 @@ export function AppLayout() {
             ) : null
           )}
         </nav>
-      </motion.aside>
+      </aside>
 
       <div className="relative z-10 flex-1 px-3 pb-24 pt-3 sm:px-4 sm:pt-4 lg:p-6 lg:pb-6">
         <header className="mb-6 rounded-[26px] border border-[#eee3e8] bg-white/92 p-4 shadow-[0_12px_36px_rgba(67,42,50,0.07)] backdrop-blur-xl sm:p-5">
