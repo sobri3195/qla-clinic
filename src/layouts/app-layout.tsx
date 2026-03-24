@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAppStore } from '@/store/app-store';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -69,6 +69,20 @@ export function AppLayout() {
   const mobileNavItems = useMemo(() => allowedItems.slice(0, 4), [allowedItems]);
   const activeItem = useMemo(() => allowedItems.find((item) => item.to === location.pathname) ?? allowedItems[0], [allowedItems, location.pathname]);
 
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!sidebarOpen) {
+      document.body.style.removeProperty('overflow');
+      return;
+    }
+
+    document.body.style.overflow = 'hidden';
+    return () => document.body.style.removeProperty('overflow');
+  }, [sidebarOpen]);
+
   const todayAppointments = appointments.filter((item) => item.date === new Date().toISOString().slice(0, 10) && item.status !== 'cancelled').length;
   const quickStats = [
     { label: 'Kunjungan aktif', value: `${todayAppointments}` },
@@ -94,8 +108,8 @@ export function AppLayout() {
       <motion.aside
         animate={{ x: 0 }}
         className={cn(
-          'fixed inset-y-0 left-0 z-30 flex w-[88vw] max-w-80 flex-col border-r border-[#eee4e8] bg-[#fffdfd]/97 p-4 backdrop-blur-xl lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:p-5',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          'fixed inset-y-2 left-2 z-30 flex w-[calc(100vw-1rem)] max-w-80 flex-col rounded-3xl border border-[#eee4e8] bg-[#fffdfd]/97 p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-[calc(env(safe-area-inset-top)+0.75rem)] shadow-[0_20px_45px_rgba(53,42,47,0.2)] backdrop-blur-xl lg:inset-y-0 lg:left-0 lg:rounded-none lg:border-r lg:border-l-0 lg:border-y-0 lg:shadow-none lg:pt-5 lg:pb-5 lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:p-5',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-[110%] lg:translate-x-0'
         )}
       >
         <div className="mb-5 flex items-start justify-between gap-3">
@@ -233,7 +247,7 @@ export function AppLayout() {
       </div>
 
       {mobileNavItems.length > 0 && (
-        <nav className="fixed inset-x-3 bottom-3 z-20 rounded-[22px] border border-white/80 bg-white/95 p-2 shadow-soft backdrop-blur lg:hidden">
+        <nav className="fixed inset-x-3 bottom-3 z-20 rounded-[22px] border border-white/80 bg-white/95 p-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] shadow-soft backdrop-blur lg:hidden">
           <div className="grid grid-cols-5 gap-2">
             {mobileNavItems.map(({ label, to, icon: Icon }) => (
               <NavLink
