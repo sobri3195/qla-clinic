@@ -98,7 +98,7 @@ export function AppLayout() {
         <div className="mb-6 rounded-[28px] border border-white/80 bg-hero-gradient p-4 shadow-soft">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold">Ringkasan hari ini</p>
+              <p className="text-sm font-semibold">Hari ini</p>
               <p className="mt-1 text-xs text-muted">{settings.openingHours}</p>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/80 text-primary shadow-sm">
@@ -149,7 +149,7 @@ export function AppLayout() {
                   </Button>
                   <div className="relative min-w-0 flex-1 xl:w-[420px]">
                     <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-                    <Input className="h-11 border-white/70 bg-white/90 pl-10" placeholder="Cari pasien, treatment, invoice, staff..." />
+                    <Input className="h-11 border-white/70 bg-white/90 pl-10" placeholder="Cari pasien atau invoice..." />
                   </div>
                 </div>
 
@@ -170,9 +170,7 @@ export function AppLayout() {
                   <Badge variant="gold">{activeItem?.label ?? 'Clinic overview'}</Badge>
                   <Badge variant="slate">{allowedItems.length} modul</Badge>
                 </div>
-                <h2 className="mt-4 text-xl font-semibold tracking-tight text-foreground sm:text-2xl lg:text-[2rem]">
-                  Workspace klinik yang ringkas, rapi, dan nyaman dipakai di desktop maupun mobile.
-                </h2>
+                <h2 className="mt-4 text-xl font-semibold tracking-tight text-foreground sm:text-2xl lg:text-[2rem]">Workspace klinik yang simpel.</h2>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                   {quickStats.map((item) => (
                     <div key={item.label} className="rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-sm">
@@ -206,7 +204,7 @@ export function AppLayout() {
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    {canAccessModule(currentUser.role, 'settings') && <DropdownMenuItem onClick={() => navigate('/settings')}>System settings</DropdownMenuItem>}
+                    {canAccessModule(currentUser.role, 'settings') && <DropdownMenuItem onClick={() => navigate('/settings')}>Pengaturan</DropdownMenuItem>}
                     <DropdownMenuItem onClick={handleLogout}>
                       <LogOut className="mr-2 h-4 w-4" /> Logout
                     </DropdownMenuItem>
@@ -219,7 +217,7 @@ export function AppLayout() {
                   <p className="text-xs text-muted">{settings.openingHours}</p>
                 </div>
                 <div className="rounded-2xl border border-white/70 bg-white/75 px-4 py-3 text-sm">
-                  <p className="font-medium">{appointments.filter((item) => item.status !== 'cancelled').length} active visits</p>
+                  <p className="font-medium">{appointments.filter((item) => item.status !== 'cancelled').length} kunjungan aktif</p>
                   <p className="text-xs text-muted">Queue {queue.length} • Follow-up {followUps.length}</p>
                 </div>
               </div>
