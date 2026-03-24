@@ -32,12 +32,12 @@ export function DashboardPage() {
   const consentedGalleryCount = patients.flatMap((patient) => patient.beforeAfter).filter((entry) => entry.consentUsage).length;
 
   return (
-    <PageShell title="Dashboard" description="Ringkasan operasional harian QLA Clinic.">
+    <PageShell title="Dashboard" description="Ringkasan harian klinik.">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="Patients today" value={`${patients.length}`} hint="Profil aktif dengan loyalty & referral" icon={Users} />
-        <StatCard title="Appointments today" value={`${appointments.filter((item) => item.date === new Date().toISOString().slice(0, 10)).length}`} hint={`${waitlistCount} waiting list dipantau`} icon={CalendarDays} />
-        <StatCard title="Active queue" value={`${queue.length}`} hint="Status antrean berjalan realtime" icon={Activity} />
-        <StatCard title="Daily revenue" value={formatCurrency(todayRevenue)} hint="Stok dan loyalty sinkron" icon={CreditCard} />
+        <StatCard title="Patients today" value={`${patients.length}`} hint="Pasien aktif" icon={Users} />
+        <StatCard title="Appointments today" value={`${appointments.filter((item) => item.date === new Date().toISOString().slice(0, 10)).length}`} hint={`${waitlistCount} waiting list`} icon={CalendarDays} />
+        <StatCard title="Active queue" value={`${queue.length}`} hint="Antrean berjalan" icon={Activity} />
+        <StatCard title="Daily revenue" value={formatCurrency(todayRevenue)} hint="Pendapatan hari ini" icon={CreditCard} />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
@@ -46,14 +46,14 @@ export function DashboardPage() {
           <CardHeader>
             <div>
               <CardTitle>Quick pulse</CardTitle>
-              <CardDescription>Snapshot singkat kondisi hari ini.</CardDescription>
+              <CardDescription>Update singkat.</CardDescription>
             </div>
             <ArrowUpRight className="h-5 w-5 text-primary" />
           </CardHeader>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
             {[
-              ['Reminder siap kirim', `${reminders.length} campaign / reminder aktif`],
-              ['Audit trail', `${auditLogs.length} perubahan data tercatat`],
+              ['Reminder', `${reminders.length} aktif`],
+              ['Audit trail', `${auditLogs.length} log`],
               ['Treatment favorit', topTreatment.name],
               ['Package highlight', treatmentPackages[0]?.name ?? '-'],
             ].map(([title, text]) => (
@@ -71,7 +71,7 @@ export function DashboardPage() {
           <CardHeader>
             <div>
               <CardTitle>Revenue trend</CardTitle>
-              <CardDescription>Statistik pendapatan mingguan.</CardDescription>
+              <CardDescription>Pendapatan mingguan.</CardDescription>
             </div>
             <Badge variant="gold">Weekly</Badge>
           </CardHeader>
@@ -81,7 +81,7 @@ export function DashboardPage() {
           <CardHeader>
             <div>
               <CardTitle>Patient flow funnel</CardTitle>
-              <CardDescription>Alur pasien dari check-in sampai pembayaran.</CardDescription>
+              <CardDescription>Alur pasien.</CardDescription>
             </div>
           </CardHeader>
           <FunnelChartCard />
@@ -93,7 +93,7 @@ export function DashboardPage() {
           <CardHeader>
             <div>
               <CardTitle>Beauty goals tracker</CardTitle>
-              <CardDescription>Target pasien yang paling sering muncul.</CardDescription>
+              <CardDescription>Target utama pasien.</CardDescription>
             </div>
             <Sparkles className="h-5 w-5 text-primary" />
           </CardHeader>
@@ -102,7 +102,7 @@ export function DashboardPage() {
               <div key={goal} className="rounded-[24px] border border-border p-5">
                 <p className="text-sm text-muted">Beauty goal</p>
                 <h3 className="mt-2 text-lg font-semibold">{goal}</h3>
-                <p className="mt-2 text-sm text-muted">{count} pasien aktif.</p>
+                <p className="mt-2 text-sm text-muted">{count} pasien</p>
               </div>
             ))}
           </div>
@@ -112,19 +112,19 @@ export function DashboardPage() {
           <CardHeader>
             <div>
               <CardTitle>Beauty care adherence</CardTitle>
-              <CardDescription>Homecare dan aset before-after.</CardDescription>
+              <CardDescription>Homecare & before-after.</CardDescription>
             </div>
           </CardHeader>
           <div className="space-y-4">
             <div className="rounded-[24px] bg-secondary p-5">
               <p className="text-sm text-muted">Average routine compliance</p>
               <h3 className="mt-2 text-3xl font-semibold">{averageRoutineCompliance}%</h3>
-              <p className="mt-2 text-sm text-muted">Kepatuhan homecare seluruh pasien aktif.</p>
+              <p className="mt-2 text-sm text-muted">Kepatuhan pasien.</p>
             </div>
             <div className="rounded-[24px] border border-border p-5">
-              <p className="text-sm text-muted">Consented before-after gallery</p>
+              <p className="text-sm text-muted">Before-after approved</p>
               <h3 className="mt-2 text-3xl font-semibold">{consentedGalleryCount} assets</h3>
-              <p className="mt-2 text-sm text-muted">Siap dipakai untuk edukasi internal.</p>
+              <p className="mt-2 text-sm text-muted">Siap dipakai.</p>
             </div>
           </div>
         </Card>
@@ -135,14 +135,14 @@ export function DashboardPage() {
           <CardHeader>
             <div>
               <CardTitle>Top treatment & package</CardTitle>
-              <CardDescription>Treatment terlaris dan performa staf.</CardDescription>
+              <CardDescription>Treatment terlaris.</CardDescription>
             </div>
           </CardHeader>
           <div className="space-y-4">
             <div className="rounded-[24px] bg-secondary p-5">
               <p className="text-sm text-muted">Most booked</p>
               <h3 className="mt-2 text-2xl font-semibold">{topTreatment.name}</h3>
-              <p className="mt-2 text-sm text-muted">{topTreatment.category} • {formatCurrency(topTreatment.price)} • popularity {topTreatment.popularity}%</p>
+              <p className="mt-2 text-sm text-muted">{topTreatment.category} • {formatCurrency(topTreatment.price)} • {topTreatment.popularity}%</p>
               <p className="mt-2 text-sm text-muted">Package: {treatmentPackages[0]?.name}</p>
             </div>
             <div className="space-y-3">
@@ -162,7 +162,7 @@ export function DashboardPage() {
           <CardHeader>
             <div>
               <CardTitle>Staff performance</CardTitle>
-              <CardDescription>Skor kepuasan dan handling.</CardDescription>
+              <CardDescription>Skor staf.</CardDescription>
             </div>
           </CardHeader>
           <StaffPerformanceChart />
@@ -171,7 +171,7 @@ export function DashboardPage() {
           <CardHeader>
             <div>
               <CardTitle>Notifications & audit</CardTitle>
-              <CardDescription>Reminder dan jejak perubahan data.</CardDescription>
+              <CardDescription>Reminder & log.</CardDescription>
             </div>
             <BellRing className="h-5 w-5 text-primary" />
           </CardHeader>
