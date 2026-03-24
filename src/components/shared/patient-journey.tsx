@@ -1,63 +1,63 @@
-import { ArrowRight, CalendarClock, ClipboardCheck, CreditCard, HeartHandshake, Stethoscope } from 'lucide-react';
+import { CalendarClock, ClipboardCheck, CreditCard, HeartHandshake, Stethoscope } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 const journeySteps = [
   {
     title: 'Booking & Registrasi',
-    description: 'Slot tervalidasi dan data awal tersimpan.',
+    description: 'Slot tervalidasi dan data awal pasien tersimpan.',
     icon: CalendarClock,
-    accent: 'from-[#f8dce2] to-[#fff5f7]',
+    accent: 'bg-[#fff5f8] border-[#f1dce3]',
   },
   {
     title: 'Check-in & Queue',
-    description: 'Nomor antrean dan ETA langsung tampil.',
+    description: 'Nomor antrean dan ETA real-time untuk front office.',
     icon: ClipboardCheck,
-    accent: 'from-[#fef0e3] to-[#fffaf2]',
+    accent: 'bg-[#fff8f1] border-[#f2e2cf]',
   },
   {
     title: 'Konsultasi Dokter',
-    description: 'SOAP note dan rekomendasi dalam satu workspace.',
+    description: 'SOAP note dan rekomendasi treatment di satu panel.',
     icon: Stethoscope,
-    accent: 'from-[#eaf7f2] to-[#f9fffc]',
+    accent: 'bg-[#f1faf6] border-[#dceee4]',
   },
   {
     title: 'Treatment & Produk',
-    description: 'Consumable dan stok otomatis sinkron.',
+    description: 'Paket perawatan dan consumable sinkron otomatis.',
     icon: HeartHandshake,
-    accent: 'from-[#f8ecf8] to-[#fff9ff]',
+    accent: 'bg-[#faf4fb] border-[#ecddf0]',
   },
   {
     title: 'Kasir & Follow-up',
-    description: 'Pembayaran dan reminder langsung lanjut.',
+    description: 'Pembayaran, reminder, dan jadwal lanjutan terhubung.',
     icon: CreditCard,
-    accent: 'from-[#eceffd] to-[#fbfcff]',
+    accent: 'bg-[#f3f5ff] border-[#e1e4f4]',
   },
 ] as const;
 
 export function PatientJourney({ className }: { className?: string }) {
   return (
     <Card className={cn('overflow-hidden p-0', className)}>
-      <div className="border-b border-[#f0e8eb] px-5 py-5 sm:px-6">
-        <p className="text-xs uppercase tracking-[0.3em] text-primary">Patient Journey</p>
-        <h3 className="mt-2 text-xl font-semibold tracking-tight">Alur pasien dari datang sampai follow-up.</h3>
+      <div className="border-b border-[#f0e6ea] px-5 py-5 sm:px-6">
+        <p className="text-xs uppercase tracking-[0.26em] text-primary">Patient Journey</p>
+        <h3 className="mt-2 text-xl font-semibold tracking-tight">Alur operasional pasien end-to-end.</h3>
       </div>
-      <div className="grid gap-4 p-5 sm:p-6 xl:grid-cols-5">
+      <div className="grid gap-3 p-5 sm:p-6 xl:grid-cols-5">
         {journeySteps.map((step, index) => {
           const Icon = step.icon;
           return (
             <div key={step.title} className="relative">
-              <div className={cn('h-full rounded-[24px] border border-[#efe5e9] bg-gradient-to-br p-5 shadow-[0_8px_24px_rgba(75,45,56,0.04)]', step.accent)}>
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/80 bg-white/90 text-primary shadow-sm">
-                    <Icon className="h-5 w-5" />
+              <div className={cn('h-full rounded-[22px] border p-4', step.accent)}>
+                <div className="flex items-center justify-between">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/90 bg-white/90 text-primary shadow-sm">
+                    <Icon className="h-4 w-4" />
                   </div>
-                  <span className="rounded-full bg-white/75 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">0{index + 1}</span>
+                  <span className="rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted">Step {index + 1}</span>
                 </div>
-                <h4 className="mt-5 text-lg font-semibold">{step.title}</h4>
+                <h4 className="mt-4 text-base font-semibold leading-tight">{step.title}</h4>
                 <p className="mt-2 text-sm leading-6 text-muted">{step.description}</p>
               </div>
-              {index < journeySteps.length - 1 && <ArrowRight className="absolute -right-2 top-1/2 hidden h-5 w-5 -translate-y-1/2 text-primary/60 xl:block" />}
+              {index < journeySteps.length - 1 && <div className="absolute right-[-8px] top-1/2 hidden h-px w-4 -translate-y-1/2 bg-[#ead8df] xl:block" />}
             </div>
           );
         })}
