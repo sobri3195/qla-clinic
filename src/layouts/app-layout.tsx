@@ -84,7 +84,7 @@ export function AppLayout() {
       <motion.aside
         animate={{ x: 0 }}
         className={cn(
-          'fixed inset-y-0 left-0 z-30 flex w-[88vw] max-w-80 flex-col border-r border-white/60 bg-white/92 p-4 backdrop-blur-xl lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:bg-white/72 lg:p-5',
+          'fixed inset-y-0 left-0 z-30 flex w-[88vw] max-w-80 flex-col border-r border-[#eee4e8] bg-[#fffdfd]/96 p-4 backdrop-blur-xl lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:bg-[#fffdfd]/88 lg:p-5',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
@@ -95,7 +95,7 @@ export function AppLayout() {
           </Button>
         </div>
 
-        <div className="mb-6 rounded-[28px] border border-white/80 bg-hero-gradient p-4 shadow-soft">
+        <div className="mb-6 rounded-[28px] border border-[#f0e6ea] bg-hero-gradient p-4 shadow-[0_14px_30px_rgba(85,57,67,0.08)]">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm font-semibold">Hari ini</p>
@@ -107,7 +107,7 @@ export function AppLayout() {
           </div>
           <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
             {quickStats.slice(0, 4).map((item) => (
-              <div key={item.label} className="rounded-2xl bg-white/70 px-3 py-2">
+              <div key={item.label} className="rounded-2xl border border-white/70 bg-white/75 px-3 py-2">
                 <p className="text-muted">{item.label}</p>
                 <p className="mt-1 font-semibold text-foreground">{item.value}</p>
               </div>
@@ -123,12 +123,12 @@ export function AppLayout() {
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
                 cn(
-                  'group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition duration-200',
-                  isActive ? 'bg-[#352a2f] text-white shadow-soft' : 'text-muted hover:bg-white/80 hover:text-foreground'
+                  'group flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm transition duration-200',
+                  isActive ? 'border-[#e7d7dd] bg-[#fff5f8] text-foreground shadow-[0_8px_24px_rgba(150,97,113,0.12)]' : 'border-transparent text-muted hover:border-[#eee2e7] hover:bg-white/85 hover:text-foreground'
                 )
               }
             >
-              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-secondary/80 transition group-hover:bg-secondary">
+              <span className={cn('flex h-9 w-9 items-center justify-center rounded-2xl border transition', location.pathname === to ? 'border-[#ebd8de] bg-white text-primary' : 'border-transparent bg-secondary/80 group-hover:bg-secondary')}>
                 <Icon className="h-4 w-4" />
               </span>
               <span className="flex-1">{label}</span>
@@ -139,7 +139,7 @@ export function AppLayout() {
       </motion.aside>
 
       <div className="relative z-10 flex-1 px-3 pb-24 pt-3 sm:px-4 sm:pt-4 lg:p-6 lg:pb-6">
-        <header className="mb-6 overflow-hidden rounded-[28px] border border-white/60 bg-white/80 p-4 shadow-soft backdrop-blur-xl sm:p-5">
+        <header className="mb-6 overflow-hidden rounded-[30px] border border-[#eee3e8] bg-white/90 p-4 shadow-[0_15px_40px_rgba(67,42,50,0.08)] backdrop-blur-xl sm:p-5">
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)] xl:items-start">
             <div className="space-y-4">
               <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
@@ -149,7 +149,7 @@ export function AppLayout() {
                   </Button>
                   <div className="relative min-w-0 flex-1 xl:w-[420px]">
                     <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-                    <Input className="h-11 border-white/70 bg-white/90 pl-10" placeholder="Cari pasien atau invoice..." />
+                    <Input className="h-11 border-[#eee4e8] bg-[#fffdfd] pl-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]" placeholder="Cari pasien, jadwal, invoice..." />
                   </div>
                 </div>
 
@@ -165,15 +165,15 @@ export function AppLayout() {
                 </div>
               </div>
 
-              <div className="rounded-[24px] border border-white/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.94),rgba(248,237,240,0.88),rgba(247,235,231,0.9))] p-4 sm:p-5">
+              <div className="rounded-[24px] border border-[#efe4e8] bg-[linear-gradient(130deg,rgba(255,255,255,0.98),rgba(250,240,245,0.92),rgba(248,238,232,0.9))] p-4 sm:p-5">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="gold">{activeItem?.label ?? 'Clinic overview'}</Badge>
                   <Badge variant="slate">{allowedItems.length} modul</Badge>
                 </div>
-                <h2 className="mt-4 text-xl font-semibold tracking-tight text-foreground sm:text-2xl lg:text-[2rem]">Workspace klinik yang simpel.</h2>
+                <h2 className="mt-4 text-xl font-semibold tracking-tight text-foreground sm:text-2xl lg:text-[2rem]">Workspace klinik yang rapi, cepat, dan premium.</h2>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                   {quickStats.map((item) => (
-                    <div key={item.label} className="rounded-2xl border border-white/70 bg-white/80 px-4 py-3 text-sm">
+                    <div key={item.label} className="rounded-2xl border border-[#efe4e8] bg-white/85 px-4 py-3 text-sm">
                       <p className="text-xs uppercase tracking-[0.18em] text-muted">{item.label}</p>
                       <p className="mt-2 font-medium text-foreground">{item.value}</p>
                     </div>
@@ -182,7 +182,7 @@ export function AppLayout() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 rounded-[24px] border border-white/70 bg-white/70 p-4 backdrop-blur">
+            <div className="flex flex-col gap-3 rounded-[24px] border border-[#eee2e7] bg-[#fffdfd]/75 p-4 backdrop-blur">
               {currentUser && (
                 <div className="rounded-2xl border border-border/80 bg-white/80 p-2">
                   <p className="px-2 pb-2 text-xs uppercase tracking-[0.18em] text-muted">Role</p>
